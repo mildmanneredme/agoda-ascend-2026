@@ -136,7 +136,7 @@ export default function XrayPanel() {
 
               <div className="my-4 flex items-center gap-2 rounded-xl border px-3 py-2 text-[0.7rem] text-ink-dim" style={{ borderColor: `color-mix(in srgb, ${accent} 30%, var(--hairline))` }}>
                 <span className="thinking-dots flex gap-1">
-                  <span /><span /><span />
+                  <span /><span /><span /><span /><span />
                 </span>
                 <span>
                   One real call ·{" "}

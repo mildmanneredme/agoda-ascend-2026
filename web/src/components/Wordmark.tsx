@@ -1,4 +1,24 @@
+import Image from "next/image";
+
 const DOTS = ["#ff2838", "#fdb812", "#00b057", "#af38b1", "#00aae0", "#4beaea"];
+
+// The official Agoda Ascend lockup (transparent, trimmed). Intrinsic 1208×312.
+const LOGO_W = 1208;
+const LOGO_H = 312;
+
+export function AscendLogo({ height = 28, className = "" }: { height?: number; className?: string }) {
+  return (
+    <Image
+      src="/brand/ascend-logo.png"
+      alt="Agoda Ascend"
+      width={LOGO_W}
+      height={LOGO_H}
+      priority
+      className={className}
+      style={{ height, width: "auto" }}
+    />
+  );
+}
 
 export function AgodaDots({ size = 5 }: { size?: number }) {
   return (

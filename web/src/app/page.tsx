@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import HeroVideo from "@/components/HeroVideo";
 import PersonaAvatar from "@/components/PersonaAvatar";
-import { AscendMark, GrandNeuralMark } from "@/components/Wordmark";
+import { AscendLogo, GrandNeuralMark } from "@/components/Wordmark";
 import { TRAVEL_STYLES, saveGuest, type GuestProfile } from "@/lib/guest";
 import { PERSONAS, styleForPersona, type Persona } from "@/lib/personas";
 import { useDevTrace } from "@/components/DevTrace";
@@ -111,7 +111,7 @@ function OnboardingInner() {
 
       <div className="pt-safe relative z-10 flex items-center justify-between px-6 pt-4">
         <button onClick={() => setStage("welcome")} className="press" aria-label="Back to home">
-          <AscendMark />
+          <AscendLogo height={26} />
         </button>
         <Link
           href="/property"
@@ -277,7 +277,7 @@ function OnboardingInner() {
               </p>
             ))}
             <div className="thinking-dots mt-4 flex gap-1.5">
-              <span /><span /><span />
+              <span /><span /><span /><span /><span />
             </div>
           </div>
         )}

@@ -160,7 +160,7 @@ export default function SentimentLab() {
         {busy && (
           <div className="mt-6 flex items-center gap-2 text-ink-dim">
             <span className="thinking-dots flex gap-1.5">
-              <span /><span /><span />
+              <span /><span /><span /><span /><span />
             </span>
             <span className="text-sm">Reading between the lines…</span>
           </div>

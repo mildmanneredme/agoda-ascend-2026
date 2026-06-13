@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AscendMark } from "@/components/Wordmark";
+import { AscendLogo, AscendMark } from "@/components/Wordmark";
 import { PILLARS, type PillarKey } from "@/components/AppHeader";
 import PersonaAvatar from "@/components/PersonaAvatar";
 import { loadGuest, styleOf, type GuestProfile } from "@/lib/guest";
@@ -94,7 +94,7 @@ export default function Hub() {
       <div className="pt-safe relative z-10 px-6 pt-4">
         <div className="mb-8 flex items-start justify-between">
           <Link href="/" aria-label="Back to home" className="press">
-            <AscendMark />
+            <AscendLogo height={28} />
           </Link>
           <Link
             href="/?choose=1"
@@ -125,7 +125,7 @@ export default function Hub() {
           </p>
         </header>
 
-        <Link href="/property" className="press foil mb-8 block overflow-hidden rounded-2xl">
+        <Link href="/property" className="press mb-8 block overflow-hidden rounded-2xl">
           <div className="glass-deep flex items-center gap-4 rounded-2xl p-4" style={{ boxShadow: "inset 2px 0 0 var(--ray-aqua)" }}>
             <span
               className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-xl"

@@ -99,7 +99,7 @@ export default function MemoryEngine() {
             </p>
             <p className="rise text-sm text-ink-dim">across every stay, every property</p>
             <div className="thinking-dots mt-5 flex gap-1.5">
-              <span /><span /><span />
+              <span /><span /><span /><span /><span />
             </div>
           </div>
         )}

@@ -243,7 +243,7 @@ export default function OfferBuilder() {
               Searching {trip.city} · {trip.guests} {trip.guests === 1 ? "guest" : "guests"}…
             </p>
             <div className="thinking-dots mt-3 flex gap-1.5">
-              <span /><span /><span />
+              <span /><span /><span /><span /><span />
             </div>
           </div>
         )}
@@ -342,7 +342,7 @@ export default function OfferBuilder() {
               </p>
             ))}
             <div className="thinking-dots mt-3 flex gap-1.5">
-              <span /><span /><span />
+              <span /><span /><span /><span /><span />
             </div>
           </div>
         )}

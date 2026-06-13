@@ -19,6 +19,13 @@
   --ray-magenta: #af38b1;
   --ray-cyan: #00aae0;
   --ray-aqua: #4beaea;
+
+  /* Official agoda palette (sampled from agoda-colours.png) — brand processing dots */
+  --agoda-red: #ea4242;
+  --agoda-gold: #f3bb43;
+  --agoda-green: #4fad60;
+  --agoda-purple: #a241ac;
+  --agoda-blue: #4ca7db;
 }
 
 @theme inline {
@@ -219,9 +226,11 @@ h1, h2, h3, .display {
   border-radius: 9999px;
   animation: pulse-dot 1.1s ease-in-out infinite;
 }
-.thinking-dots span:nth-child(1) { background: var(--ray-aqua); }
-.thinking-dots span:nth-child(2) { background: var(--ray-magenta); animation-delay: 0.18s; }
-.thinking-dots span:nth-child(3) { background: var(--ray-amber); animation-delay: 0.36s; }
+.thinking-dots span:nth-child(1) { background: var(--agoda-red); }
+.thinking-dots span:nth-child(2) { background: var(--agoda-gold); animation-delay: 0.12s; }
+.thinking-dots span:nth-child(3) { background: var(--agoda-green); animation-delay: 0.24s; }
+.thinking-dots span:nth-child(4) { background: var(--agoda-purple); animation-delay: 0.36s; }
+.thinking-dots span:nth-child(5) { background: var(--agoda-blue); animation-delay: 0.48s; }
 
 .toast-in {
   animation: toast-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;

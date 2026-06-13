@@ -73,8 +73,9 @@ export default function Journey() {
     return () => clearTimeout(t);
   }, [phase, plan, visible]);
 
-  async function simulate() {
-    const isCancel = scenario === "cancel";
+  async function simulate(kind: Scenario) {
+    const isCancel = kind === "cancel";
+    setScenario(kind);
     setPhase("thinking");
     setError(null);
     setVisible(0);
@@ -90,7 +91,7 @@ export default function Journey() {
           brief: personaOf(guest)?.brief,
           flight,
           delayMinutes: DELAY_MIN,
-          scenario,
+          scenario: kind,
         }),
         signal: ctrl.signal,
       });
@@ -147,22 +148,6 @@ export default function Journey() {
 
         {phase === "ready" && (
           <>
-            {/* scenario toggle */}
-            <div className="mb-3 grid grid-cols-2 gap-2">
-              {(["delay", "cancel"] as Scenario[]).map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setScenario(s)}
-                  className={`press rounded-xl px-3 py-2.5 text-[0.8rem] font-semibold ${
-                    scenario === s ? "glass-deep text-ink" : "glass text-ink-dim"
-                  }`}
-                  style={scenario === s ? { borderColor: "color-mix(in srgb, var(--ray-amber) 45%, transparent)" } : undefined}
-                >
-                  {s === "delay" ? "3-hour delay" : "Flight cancelled"}
-                </button>
-              ))}
-            </div>
-
             {/* flight selector */}
             <div className="mb-4 flex gap-2">
               {FLIGHTS.map((f) => (
@@ -234,19 +219,27 @@ export default function Journey() {
         )}
 
         {phase === "ready" && (
-          <button
-            onClick={simulate}
-            className="press w-full rounded-2xl bg-ink py-4 font-display text-base font-semibold text-abyss shadow-[0_0_40px_rgba(253,184,18,0.2)]"
-          >
-            {isCancel ? "Simulate a flight cancellation" : "Simulate a 3-hour delay"}
-          </button>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={() => simulate("delay")}
+              className="press w-full rounded-2xl bg-ink py-4 font-display text-base font-semibold text-abyss shadow-[0_0_40px_rgba(253,184,18,0.2)]"
+            >
+              Simulate a 3-hour delay
+            </button>
+            <button
+              onClick={() => simulate("cancel")}
+              className="press w-full rounded-2xl bg-ink py-4 font-display text-base font-semibold text-abyss shadow-[0_0_40px_rgba(253,184,18,0.2)]"
+            >
+              Simulate a flight cancellation
+            </button>
+          </div>
         )}
 
         {phase === "thinking" && (
           <div className="flex flex-col items-start pt-4">
             <p className="rise font-display text-lg font-medium text-ink">The hotel is reacting…</p>
             <div className="thinking-dots mt-3 flex gap-1.5">
-              <span /><span /><span />
+              <span /><span /><span /><span /><span />
             </div>
           </div>
         )}

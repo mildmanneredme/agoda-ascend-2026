@@ -181,7 +181,7 @@ export default function Mice() {
             </button>
             {stage === "clarifying" && (
               <div className="mt-6 flex items-center gap-2 text-ink-dim">
-                <span className="thinking-dots flex gap-1.5"><span /><span /><span /></span>
+                <span className="thinking-dots flex gap-1.5"><span /><span /><span /><span /><span /></span>
                 <span className="text-sm">Thinking of what to ask…</span>
               </div>
             )}
@@ -227,7 +227,7 @@ export default function Mice() {
             )}
             {stage === "proposing" && (
               <div className="mt-6 flex items-center gap-2 text-ink-dim">
-                <span className="thinking-dots flex gap-1.5"><span /><span /><span /></span>
+                <span className="thinking-dots flex gap-1.5"><span /><span /><span /><span /><span /></span>
                 <span className="text-sm">Matching spaces, pricing, drafting…</span>
               </div>
             )}

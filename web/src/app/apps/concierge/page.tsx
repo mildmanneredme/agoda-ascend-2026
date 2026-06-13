@@ -309,7 +309,7 @@ export default function Concierge() {
                 )}
                 {msg.text || (
                   <span className="thinking-dots flex gap-1.5 py-1">
-                    <span /><span /><span />
+                    <span /><span /><span /><span /><span />
                   </span>
                 )}
                 {msg.nudge && !nudgeAnswered && (
