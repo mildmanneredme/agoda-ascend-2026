@@ -9,8 +9,6 @@ type DevTraceValue = {
   record: (trace: Trace) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
-  cogOffset: number; // px lift for the cog, so it clears page bottom bars
-  setCogOffset: (px: number) => void;
 };
 
 const Ctx = createContext<DevTraceValue | null>(null);
@@ -19,7 +17,6 @@ export function DevTraceProvider({ children }: { children: React.ReactNode }) {
   const [trace, setTrace] = useState<Trace | null>(null);
   const [seq, setSeq] = useState(0);
   const [open, setOpen] = useState(false);
-  const [cogOffset, setCogOffset] = useState(0);
 
   const record = useCallback((t: Trace) => {
     setTrace(t);
@@ -27,8 +24,8 @@ export function DevTraceProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ trace, seq, record, open, setOpen, cogOffset, setCogOffset }),
-    [trace, seq, open, cogOffset]
+    () => ({ trace, seq, record, open, setOpen }),
+    [trace, seq, open]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

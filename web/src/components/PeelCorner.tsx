@@ -14,7 +14,7 @@ import { MODULES } from "@/lib/trace";
 const HINT_KEY = "peel-hinted";
 
 export default function PeelCorner() {
-  const { open, setOpen, seq, trace, cogOffset } = useDevTrace();
+  const { open, setOpen, seq, trace } = useDevTrace();
   const [fresh, setFresh] = useState(false);
   const [hint, setHint] = useState(false);
   const lastSeq = useRef(0);
@@ -68,7 +68,7 @@ export default function PeelCorner() {
   return (
     <div
       className="fixed right-0 z-[60] flex flex-col items-end"
-      style={{ bottom: `calc(env(safe-area-inset-bottom) + ${cogOffset}px)` }}
+      style={{ bottom: "env(safe-area-inset-bottom)" }}
     >
       {hint && (
         <span

@@ -107,13 +107,6 @@ export default function Concierge() {
 
   useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
 
-  // lift the cog above the chat input bar while this screen is mounted
-  const { setCogOffset } = useDevTrace();
-  useEffect(() => {
-    setCogOffset(86);
-    return () => setCogOffset(0);
-  }, [setCogOffset]);
-
   function answerNudge(yes: boolean) {
     setNudgeAnswered(true);
     if (yes) {

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AscendLogo, AscendMark } from "@/components/Wordmark";
+import { AscendLogo } from "@/components/Wordmark";
 import { PILLARS, type PillarKey } from "@/components/AppHeader";
 import PersonaAvatar from "@/components/PersonaAvatar";
 import { loadGuest, styleOf, type GuestProfile } from "@/lib/guest";
@@ -209,11 +209,11 @@ export default function Hub() {
           );
         })}
 
-        <footer className="mt-12 flex flex-col items-center gap-1 pb-6 text-center">
+        <footer className="mt-12 flex flex-col items-center gap-2 pb-6 text-center">
           <p className="text-[0.65rem] uppercase tracking-[0.22em] text-ink-faint">
             A sandbox by
           </p>
-          <AscendMark />
+          <AscendLogo height={24} />
         </footer>
       </div>
     </main>
