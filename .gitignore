@@ -1,0 +1,28 @@
+# --- secrets / environment ---
+.env
+.env.*
+
+# --- OS noise ---
+.DS_Store
+
+# --- dependencies & build output (any level) ---
+node_modules/
+.next/
+out/
+build/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# --- tooling / deploy ---
+.vercel
+.claude/
+
+# --- internal reference material (not for the public repo) ---
+reference-docs/
+
+# --- logs ---
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*

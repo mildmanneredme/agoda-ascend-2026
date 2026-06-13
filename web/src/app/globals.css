@@ -1,0 +1,244 @@
+@import "tailwindcss";
+
+:root {
+  /* Ascend brand — extracted from the deck theme */
+  --abyss: #0a0e24;
+  --navy: #121838;
+  --navy-raise: #1a2150;
+  --violet: #4400c6;
+  --blue: #0040c1;
+  --ink: #f2f4fd;
+  --ink-dim: rgba(242, 244, 253, 0.64);
+  --ink-faint: rgba(242, 244, 253, 0.4);
+  --hairline: rgba(178, 192, 255, 0.14);
+
+  /* The agoda rainbow */
+  --ray-red: #ff2838;
+  --ray-amber: #fdb812;
+  --ray-green: #00b057;
+  --ray-magenta: #af38b1;
+  --ray-cyan: #00aae0;
+  --ray-aqua: #4beaea;
+}
+
+@theme inline {
+  --color-abyss: var(--abyss);
+  --color-navy: var(--navy);
+  --color-navy-raise: var(--navy-raise);
+  --color-violet: var(--violet);
+  --color-brand-blue: var(--blue);
+  --color-ink: var(--ink);
+  --color-ink-dim: var(--ink-dim);
+  --color-ink-faint: var(--ink-faint);
+  --color-hairline: var(--hairline);
+  --color-ray-red: var(--ray-red);
+  --color-ray-amber: var(--ray-amber);
+  --color-ray-green: var(--ray-green);
+  --color-ray-magenta: var(--ray-magenta);
+  --color-ray-cyan: var(--ray-cyan);
+  --color-ray-aqua: var(--ray-aqua);
+  --font-display: var(--font-outfit);
+  --font-sans: var(--font-albert);
+}
+
+html {
+  background: var(--abyss);
+  color-scheme: dark;
+}
+
+body {
+  min-height: 100dvh;
+  background:
+    radial-gradient(120% 90% at 85% -10%, rgba(68, 0, 198, 0.35), transparent 55%),
+    radial-gradient(110% 80% at -10% 110%, rgba(0, 64, 193, 0.28), transparent 55%),
+    var(--abyss);
+  color: var(--ink);
+  font-family: var(--font-albert), system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+
+/* film grain over everything, very quiet */
+body::after {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  z-index: 80;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  opacity: 0.04;
+}
+
+h1, h2, h3, .display {
+  font-family: var(--font-outfit), system-ui, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- surfaces ---------- */
+
+.glass {
+  background: linear-gradient(155deg, rgba(178, 192, 255, 0.1), rgba(178, 192, 255, 0.03) 58%);
+  border: 1px solid var(--hairline);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.glass-deep {
+  background: linear-gradient(165deg, rgba(26, 33, 80, 0.85), rgba(13, 17, 44, 0.92));
+  border: 1px solid var(--hairline);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.press {
+  transition: transform 0.18s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.press:active {
+  transform: scale(0.97);
+}
+
+/* ---------- motion ---------- */
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bloom {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: var(--ray-min, 0.5); transform: scaleX(0.96); }
+  50% { opacity: var(--ray-max, 1); transform: scaleX(1.04); }
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.25; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-18px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes cog-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* peel corner — the lifted page corner that opens the X-ray panel.
+   Anchored at its bottom-right (transform-origin set on the element). */
+@keyframes peel-lift {
+  0% { transform: scale(1) rotate(0deg); }
+  40% { transform: scale(1.18) rotate(-2.5deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes peel-hint {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  22% { transform: scale(1.14) rotate(-2deg); }
+  50% { transform: scale(1.02) rotate(-0.5deg); }
+  74% { transform: scale(1.1) rotate(-1.5deg); }
+}
+
+.rise {
+  animation: rise 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.bloom {
+  animation: bloom 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stagger > * {
+  animation: rise 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger > *:nth-child(2) { animation-delay: 0.12s; }
+.stagger > *:nth-child(3) { animation-delay: 0.19s; }
+.stagger > *:nth-child(4) { animation-delay: 0.26s; }
+.stagger > *:nth-child(5) { animation-delay: 0.33s; }
+.stagger > *:nth-child(6) { animation-delay: 0.4s; }
+.stagger > *:nth-child(7) { animation-delay: 0.47s; }
+.stagger > *:nth-child(8) { animation-delay: 0.54s; }
+.stagger > *:nth-child(9) { animation-delay: 0.61s; }
+.stagger > *:nth-child(10) { animation-delay: 0.68s; }
+
+/* iridescent text — for hero words */
+.prism-text {
+  background: linear-gradient(100deg, var(--ray-aqua), var(--ray-cyan) 22%, var(--ray-magenta) 48%, var(--ray-amber) 74%, var(--ray-aqua) 96%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 7s linear infinite;
+}
+
+/* holographic foil sweep — Memory Engine card */
+.foil {
+  position: relative;
+  overflow: hidden;
+}
+.foil::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 32%,
+    rgba(75, 234, 234, 0.14) 42%,
+    rgba(175, 56, 177, 0.16) 50%,
+    rgba(253, 184, 18, 0.12) 58%,
+    transparent 68%
+  );
+  background-size: 280% 100%;
+  animation: shimmer 6.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.thinking-dots span {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  animation: pulse-dot 1.1s ease-in-out infinite;
+}
+.thinking-dots span:nth-child(1) { background: var(--ray-aqua); }
+.thinking-dots span:nth-child(2) { background: var(--ray-magenta); animation-delay: 0.18s; }
+.thinking-dots span:nth-child(3) { background: var(--ray-amber); animation-delay: 0.36s; }
+
+.toast-in {
+  animation: toast-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* safe-area helpers */
+.pb-safe {
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+}
+.pt-safe {
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
