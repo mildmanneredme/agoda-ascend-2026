@@ -60,10 +60,10 @@ const APPS: SandboxApp[] = [
     pillar: "human-edge",
   },
   {
-    href: "/apps/intent",
-    name: "Intent Engine",
-    hook: "Type in any language. Be perfectly understood.",
-    emoji: "⟡",
+    href: "/apps/care-radar",
+    name: "Care Radar",
+    hook: "See how every in-house guest is really feeling",
+    emoji: "◎",
     pillar: "human-edge",
   },
 ];

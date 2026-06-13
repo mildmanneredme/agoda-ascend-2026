@@ -142,8 +142,8 @@ Root directory = `web/`. Set `GEMINI_API_KEY`. Generated media is committed unde
 
 ### Pages (10)
 - `/`
+- `/apps/care-radar`
 - `/apps/concierge`
-- `/apps/intent`
 - `/apps/journey`
 - `/apps/memory-engine`
 - `/apps/mice`
@@ -153,8 +153,8 @@ Root directory = `web/`. Set `GEMINI_API_KEY`. Generated media is committed unde
 - `/property`
 
 ### API endpoints (7)
+- `/api/care-radar`
 - `/api/concierge`
-- `/api/intent`
 - `/api/journey`
 - `/api/memory`
 - `/api/mice`
@@ -165,7 +165,7 @@ Root directory = `web/`. Set `GEMINI_API_KEY`. Generated media is committed unde
 `AgentMap` · `AppHeader` · `DevTrace` · `HeroVideo` · `Media` · `PeelCorner` · `PersonaAvatar` · `RayBurst` · `Wordmark` · `XrayPanel`
 
 ### Library modules (`web/src/lib`)
-`artStyle` · `gemini` · `guest` · `hotel` · `personas` · `trace`
+`artStyle` · `careRadar` · `gemini` · `guest` · `hotel` · `personas` · `trace`
 
 ### Hotel catalogues (`lib/hotel.ts` exports)
 `HOTEL` · `FACILITIES` · `SPA_PACKAGES` · `FITNESS` · `CLASSES` · `TRANSFERS` · `EVENTS` · `ATTRIBUTES` · `PARTNERS` · `HOUSEKEEPING_SLOTS` · `EVENT_SPACES` · `DDR_PER_PERSON`
@@ -174,5 +174,6 @@ Root directory = `web/`. Set `GEMINI_API_KEY`. Generated media is committed unde
 - property/luxe: **25** · property/neon: **19** · personas: **6** · hero: **4**
 
 ### Docs (`docs/`)
+- [`docs/care-radar-floorplan.md`](docs/care-radar-floorplan.md)
 - [`docs/intent-engine-alternatives.md`](docs/intent-engine-alternatives.md)
 <!-- AUTO:END -->

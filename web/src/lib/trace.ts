@@ -21,7 +21,8 @@ export type AgentId =
   | "sentiment"
   | "dispatch"
   | "events"
-  | "linguist";
+  | "linguist"
+  | "care";
 
 export type AgentSpec = { id: AgentId; label: string; glyph: string; color: string };
 
@@ -40,6 +41,7 @@ export const AGENTS: Record<AgentId, AgentSpec> = {
   dispatch: { id: "dispatch", label: "Task Dispatch", glyph: "⊿", color: "var(--ray-amber)" },
   events: { id: "events", label: "Events & MICE", glyph: "▣", color: "var(--ray-cyan)" },
   linguist: { id: "linguist", label: "Language Engine", glyph: "⟡", color: "var(--ray-aqua)" },
+  care: { id: "care", label: "Empathy Engine", glyph: "◎", color: "var(--ray-magenta)" },
 };
 
 export type TraceStep = { agentId: AgentId; note: string };
@@ -143,16 +145,16 @@ export const MODULES: Record<string, ModuleMeta> = {
     footer:
       "A 30-second proposal looks effortless because the pricing, space-fit and email were composed in a single coordinated pass.",
   },
-  intent: {
-    name: "Intent Engine",
-    glyph: "⟡",
+  "care-radar": {
+    name: "Care Radar",
+    glyph: "◎",
     pillarLabel: "Human Edge",
     accent: "var(--ray-magenta)",
-    signature: "linguist",
+    signature: "care",
     architecture:
-      "Language is detected first; intent, urgency, routing and a native-language reply (plus an English gloss for staff) all flow from that single detection.",
+      "The board's RAG states are seeded; tapping a guest sends their interaction history to one Gemini call that reads the emotion, infers the unspoken need, and composes a staff care brief — gestures and restraint together.",
     footer:
-      "It answered in your language because it understood the language first — everything else was downstream of that.",
+      "It felt like care because the AI was told to perceive, not just parse — and to know when the kindest move is to hold back.",
   },
 };
 
