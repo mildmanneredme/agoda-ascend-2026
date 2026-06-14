@@ -21,6 +21,13 @@ next-env.d.ts
 # --- internal reference material (not for the public repo) ---
 reference-docs/
 
+# --- media generation scratch + intermediate clips (kept local, too large for git) ---
+# `assets/` is the multi-GB working area for media gen (frames, raw clips, source masters).
+# The hero per-scene clips/frames are superseded by the edited masters in web/public/hero/.
+assets/
+web/public/hero/clips/
+web/public/hero/frames/
+
 # --- logs ---
 npm-debug.log*
 yarn-debug.log*

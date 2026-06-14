@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState, useSyncExternalStore } from "react";
-import { heroPoster, heroVideo, useArtStyle } from "@/lib/artStyle";
+import { heroMaster, heroPoster, useArtStyle } from "@/lib/artStyle";
 
 const RM_QUERY = "(prefers-reduced-motion: reduce)";
 function subscribeRM(cb: () => void) {
@@ -18,21 +18,50 @@ function usePrefersReducedMotion() {
   );
 }
 
+// Portrait master on mobile / portrait viewports, landscape otherwise.
+const PORTRAIT_QUERY = "(orientation: portrait), (max-width: 768px)";
+function subscribePortrait(cb: () => void) {
+  const m = window.matchMedia(PORTRAIT_QUERY);
+  m.addEventListener("change", cb);
+  return () => m.removeEventListener("change", cb);
+}
+function usePortrait() {
+  return useSyncExternalStore(
+    subscribePortrait,
+    () => window.matchMedia(PORTRAIT_QUERY).matches,
+    () => false, // SSR: assume landscape; corrected on hydration
+  );
+}
+
 /**
- * Ambient property loop behind the landing experience. Muted, looping,
- * poster-backed; falls back to the poster still under prefers-reduced-motion
- * or if the video asset is missing. A heavy scrim keeps overlaid text legible.
+ * Ambient property loop behind the landing experience: a single edited master
+ * clip (the full arrival sequence), looped. Picks the portrait or landscape
+ * master by viewport. Falls back to the poster still under prefers-reduced-motion
+ * or if the master is missing (e.g. a style not yet produced). A heavy scrim
+ * keeps overlaid text legible.
  */
 export default function HeroVideo() {
   const [style] = useArtStyle();
   const reduced = usePrefersReducedMotion();
+  const portrait = usePortrait();
+
+  const orient = portrait ? "port" : "land";
+  const src = heroMaster(style, orient);
+  const poster = heroPoster(style);
+
+  // Reset the fallback flag whenever the source changes (style/orientation switch).
+  const [prevSrc, setPrevSrc] = useState(src);
   const [videoOk, setVideoOk] = useState(true);
+  if (prevSrc !== src) {
+    setPrevSrc(src);
+    setVideoOk(true);
+  }
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
       <Image
-        key={heroPoster(style)}
-        src={heroPoster(style)}
+        key={poster}
+        src={poster}
         alt=""
         fill
         priority
@@ -41,18 +70,17 @@ export default function HeroVideo() {
       />
       {!reduced && videoOk && (
         <video
-          key={heroVideo(style)}
+          key={src}
           autoPlay
           muted
           loop
           playsInline
-          preload="metadata"
-          poster={heroPoster(style)}
-          onLoadedMetadata={(e) => { e.currentTarget.playbackRate = 0.8; }}
+          preload="auto"
+          poster={poster}
           onError={() => setVideoOk(false)}
           className="absolute inset-0 h-full w-full object-cover"
         >
-          <source src={heroVideo(style)} type="video/mp4" />
+          <source src={src} type="video/mp4" />
         </video>
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-abyss via-abyss/75 to-abyss/45" />

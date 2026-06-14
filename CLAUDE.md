@@ -171,7 +171,7 @@ Root directory = `web/`. Set `GEMINI_API_KEY`. Generated media is committed unde
 `HOTEL` · `FACILITIES` · `SPA_PACKAGES` · `FITNESS` · `CLASSES` · `TRANSFERS` · `EVENTS` · `ATTRIBUTES` · `PARTNERS` · `HOUSEKEEPING_SLOTS` · `EVENT_SPACES` · `DDR_PER_PERSON`
 
 ### Generated media (`web/public`)
-- property/luxe: **25** · property/neon: **19** · personas: **6** · hero: **4**
+- property/luxe: **25** · property/neon: **19** · personas: **6** · hero: **8**
 
 ### Docs (`docs/`)
 - [`docs/care-radar-floorplan.md`](docs/care-radar-floorplan.md)

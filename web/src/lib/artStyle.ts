@@ -30,6 +30,14 @@ export function heroPoster(style: ArtStyle): string {
   return `/hero/landing-${style}-poster.webp`;
 }
 
+export type HeroOrient = "land" | "port";
+
+/** Single edited hero master per style + orientation, e.g. `/hero/hero-land-luxe.mp4`.
+ * The HeroVideo player loops this one file (orientation chosen by viewport). */
+export function heroMaster(style: ArtStyle, orient: HeroOrient): string {
+  return `/hero/hero-${orient}-${style}.mp4`;
+}
+
 function isStyle(v: unknown): v is ArtStyle {
   return v === "luxe" || v === "neon";
 }
