@@ -1,5 +1,5 @@
 /**
- * Care Radar — the in-house roster the staff-facing board reads.
+ * EQ Radar — the in-house roster the staff-facing board reads.
  *
  * Every checked-in guest carries a *seeded* emotional read (RAG status, emotion,
  * intensity, occasion) so the 3D board paints instantly and stays deterministic

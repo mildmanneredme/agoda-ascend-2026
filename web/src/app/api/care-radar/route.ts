@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     .map((i) => `• [${i.channel} · ${i.time}] ${i.text}`)
     .join("\n");
 
-  const prompt = `You are the Care Radar of ${HOTEL.name} — the empathy layer the staff rely on. You read the human state behind a guest's stay and tell the team how to show up. Empathy is perception + restraint + the right gesture: sometimes the most caring move is to suppress an upsell, protect someone's privacy, or simply leave them be.
+  const prompt = `You are the EQ Radar of ${HOTEL.name} — the empathy layer the staff rely on. You read the human state behind a guest's stay and tell the team how to show up. Empathy is perception + restraint + the right gesture: sometimes the most caring move is to suppress an upsell, protect someone's privacy, or simply leave them be.
 
 Read the interaction history below. Infer the guest's true emotional state and the unspoken need, then write a care brief for staff: what's really going on, what to do now, and — just as importantly — what NOT to do. Be specific to THIS guest and ground every gesture in what ${HOTEL.name} actually offers. Calibrate the tone of the suggested reply to their emotional register; never sound templated.
 
@@ -78,6 +78,6 @@ ${interactions}`;
     });
   } catch (err) {
     console.error("care-radar route failed", err);
-    return Response.json({ error: "The Care Radar is busy — try again." }, { status: 502 });
+    return Response.json({ error: "EQ Radar is busy — try again." }, { status: 502 });
   }
 }

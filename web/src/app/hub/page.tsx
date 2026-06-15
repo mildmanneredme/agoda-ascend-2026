@@ -62,7 +62,7 @@ const APPS: SandboxApp[] = [
   },
   {
     href: "/apps/care-radar",
-    name: "Care Radar",
+    name: "EQ Radar",
     hook: "See how every in-house guest is really feeling",
     emoji: "◎",
     pillar: "human-edge",

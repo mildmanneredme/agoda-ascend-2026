@@ -179,7 +179,7 @@ export const MODULES: Record<string, ModuleMeta> = {
     ],
   },
   "care-radar": {
-    name: "Care Radar",
+    name: "EQ Radar",
     glyph: "◎",
     pillarLabel: "Human Edge",
     accent: "var(--ray-magenta)",
