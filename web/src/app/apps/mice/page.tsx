@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import AppHeader from "@/components/AppHeader";
 import { useDevTrace } from "@/components/DevTrace";
+import LiveReasoning from "@/components/LiveReasoning";
 import { prettyJson } from "@/lib/trace";
 
 const SAMPLES = [
@@ -51,7 +52,20 @@ export default function Mice() {
   const [answers, setAnswers] = useState<string[]>([]);
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  async function copyEmail(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      if (copyTimer.current) clearTimeout(copyTimer.current);
+      copyTimer.current = setTimeout(() => setCopied(false), 1800);
+    } catch {
+      /* clipboard unavailable — silently no-op */
+    }
+  }
 
   async function askCoPilot(text: string) {
     if (!text.trim() || stage === "clarifying") return;
@@ -133,6 +147,7 @@ export default function Mice() {
     setAnswers([]);
     setProposal(null);
     setError(null);
+    setCopied(false);
   }
 
   return (
@@ -191,18 +206,21 @@ export default function Mice() {
         {/* ---------- ANSWER follow-up questions ---------- */}
         {(stage === "answer" || stage === "proposing") && (
           <div>
-            <div className="glass mb-3 flex items-start gap-3 rounded-2xl rounded-tl-sm p-4">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ray-magenta/15 text-sm">✦</span>
+            <div className="bloom glass mb-3 flex items-start gap-3 rounded-2xl rounded-tl-sm p-4">
+              <span className="lightbulb flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ray-amber/15 text-base">💡</span>
               <p className="text-[0.88rem] leading-relaxed text-ink">
                 Got it. {questions.length === 1 ? "One quick question" : "A couple of quick questions"} so I pitch the right room:
               </p>
             </div>
 
-            <div className="stagger mb-4 flex flex-col gap-3">
+            <div className="mb-4 flex flex-col gap-3">
               {questions.map((q, i) => (
-                <div key={i} className="glass-deep rounded-2xl p-4">
+                <div key={i} className="slide-in-left glass-deep rounded-2xl p-4" style={{ animationDelay: `${0.12 + i * 0.14}s` }}>
                   <p className="text-[0.9rem] font-semibold text-ink">{q.question}</p>
-                  <p className="mt-0.5 mb-2 text-[0.72rem] text-ink-faint">{q.why}</p>
+                  <p className="mt-1 mb-2 flex items-center gap-1.5 text-[0.72rem] text-ray-amber">
+                    <span className="shrink-0 text-[0.7rem]">↳ why it matters</span>
+                    <span className="text-ink-faint">{q.why}</span>
+                  </p>
                   <input
                     value={answers[i] ?? ""}
                     onChange={(e) => setAnswers((a) => a.map((v, j) => (j === i ? e.target.value : v)))}
@@ -226,10 +244,13 @@ export default function Mice() {
               </button>
             )}
             {stage === "proposing" && (
-              <div className="mt-6 flex items-center gap-2 text-ink-dim">
-                <span className="thinking-dots flex gap-1.5"><span /><span /><span /><span /><span /></span>
-                <span className="text-sm">Matching spaces, pricing, drafting…</span>
-              </div>
+              <>
+                <div className="mt-6 flex items-center gap-2 text-ink-dim">
+                  <span className="thinking-dots flex gap-1.5"><span /><span /><span /><span /><span /></span>
+                  <span className="text-sm">Matching spaces, pricing, drafting…</span>
+                </div>
+                <LiveReasoning appKey="mice" active={stage === "proposing"} className="mt-3" />
+              </>
             )}
           </div>
         )}
@@ -320,9 +341,22 @@ export default function Mice() {
             )}
 
             {/* draft email */}
-            <div className="bloom glass rounded-2xl p-4">
-              <p className="mb-2 text-[0.6rem] font-bold uppercase tracking-[0.18em] text-ray-aqua">Draft reply email</p>
+            <div className="bloom glass relative rounded-2xl p-4">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <p className="text-[0.6rem] font-bold uppercase tracking-[0.18em] text-ray-aqua">Draft reply email</p>
+                <button
+                  onClick={() => copyEmail(proposal.email)}
+                  className="press shrink-0 rounded-full border border-hairline px-3 py-1.5 text-[0.72rem] font-semibold text-ink-dim"
+                >
+                  Copy email 📋
+                </button>
+              </div>
               <p className="whitespace-pre-wrap text-[0.85rem] leading-relaxed text-ink">{proposal.email}</p>
+              {copied && (
+                <div className="toast-in pointer-events-none absolute right-4 top-3 rounded-full bg-ray-green/15 px-3 py-1.5 text-[0.72rem] font-semibold text-ray-green">
+                  Copied!
+                </div>
+              )}
             </div>
 
             <button onClick={reset} className="press mt-4 w-full rounded-2xl py-3 text-sm font-semibold text-ink-dim">

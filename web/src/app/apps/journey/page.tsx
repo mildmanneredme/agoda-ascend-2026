@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "@/components/AppHeader";
+import LiveReasoning from "@/components/LiveReasoning";
 import { loadGuest, type GuestProfile } from "@/lib/guest";
 import { personaOf } from "@/lib/personas";
 import { useDevTrace } from "@/components/DevTrace";
@@ -31,7 +32,7 @@ const KIND_ICON: Record<string, string> = {
 
 type Scenario = "delay" | "cancel";
 
-type JourneyAction = { kind: string; title: string; detail: string; timing: string };
+type JourneyAction = { kind: string; title: string; detail: string; timing: string; time?: string };
 type Plan = {
   headline: string;
   summary: string;
@@ -43,6 +44,41 @@ function addMinutes(hhmm: string, mins: number): string {
   const [h, m] = hhmm.split(":").map(Number);
   const total = (h * 60 + m + mins) % (24 * 60);
   return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
+
+// Pull a clean "HH:MM" out of whatever Gemini hands back, if there is one.
+function cleanTime(raw?: string): string | null {
+  if (!raw) return null;
+  const m = raw.match(/\b(\d{1,2}):(\d{2})\b/);
+  if (!m) return null;
+  const h = Number(m[1]);
+  const min = Number(m[2]);
+  if (h > 23 || min > 59) return null;
+  return `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
+}
+
+// A robust client-side fallback clock time per action kind, anchored to the
+// scheduled / new departure so the timeline always reads cleanly even if the
+// model omits or fumbles `time`.
+const KIND_OFFSET: Record<string, number> = {
+  message: 0, // the moment it posts
+  checkout: 30,
+  extend: 30,
+  dayroom: 45,
+  lounge: 60,
+  transfer: -60, // an hour before the new departure
+  rebook: 75,
+  arrival: 90,
+};
+
+function fallbackTime(kind: string, std: string, dep: string, isCancel: boolean): string {
+  if (isCancel) {
+    // Cancellation centres on tonight's stay — anchor around the original departure.
+    const off = KIND_OFFSET[kind] ?? 30;
+    return addMinutes(std, off);
+  }
+  if (kind === "transfer") return addMinutes(dep, KIND_OFFSET.transfer);
+  return addMinutes(std, KIND_OFFSET[kind] ?? 30);
 }
 
 export default function Journey() {
@@ -129,6 +165,13 @@ export default function Journey() {
   const isCancel = scenario === "cancel";
   const newDep = addMinutes(flight.std, DELAY_MIN);
   const disrupted = phase !== "ready";
+
+  // Resolve each action to a clock time (model-provided when usable, else a
+  // grounded fallback) so the recovery list becomes a real-time timeline.
+  const timeline = (plan?.actions ?? []).map((a) => ({
+    ...a,
+    at: cleanTime(a.time) ?? cleanTime(a.timing) ?? fallbackTime(a.kind, flight.std, newDep, isCancel),
+  }));
 
   return (
     <main className="relative min-h-dvh overflow-hidden">
@@ -236,34 +279,73 @@ export default function Journey() {
         )}
 
         {phase === "thinking" && (
-          <div className="flex flex-col items-start pt-4">
-            <p className="rise font-display text-lg font-medium text-ink">The hotel is reacting…</p>
-            <div className="thinking-dots mt-3 flex gap-1.5">
-              <span /><span /><span /><span /><span />
-            </div>
+          <div className="flex flex-col items-start pt-1">
+            <p className="rise mb-3 font-display text-lg font-medium text-ink">The hotel is reacting…</p>
+            <LiveReasoning appKey="journey" active={phase === "thinking"} className="w-full" />
           </div>
         )}
 
         {phase === "handled" && plan && (
           <div>
+            {/* Emotional beat: alarm → relief. */}
+            <div
+              className="glow-flash bloom mb-4 rounded-2xl border p-4"
+              style={{
+                borderColor: "color-mix(in srgb, var(--ray-red) 35%, transparent)",
+                background: "color-mix(in srgb, var(--ray-red) 8%, transparent)",
+                ["--flash" as string]: "var(--ray-red)",
+              }}
+            >
+              <p className="text-[0.92rem] font-semibold leading-snug text-ink">
+                {isCancel ? (
+                  <>
+                    Your <span className="text-ray-red line-through">{flight.std}</span> departure was{" "}
+                    <span className="text-ray-red">cancelled</span>.
+                  </>
+                ) : (
+                  <>
+                    Your <span className="text-ray-amber line-through">{flight.std}</span> departure is now{" "}
+                    <span className="text-ray-amber">{newDep}</span>.
+                  </>
+                )}{" "}
+                <span className="text-ray-green">Here&apos;s what&apos;s already in motion.</span>
+              </p>
+            </div>
+
             <div className="bloom mb-4">
               <h3 className="display text-xl font-bold text-ray-amber">{plan.headline}</h3>
               <p className="mt-1 text-sm text-ink-dim">{plan.summary}</p>
             </div>
-            <div className="flex flex-col gap-2.5">
-              {plan.actions.slice(0, visible).map((a, i) => (
-                <div key={i} className="bloom glass flex items-start gap-3 rounded-2xl p-4">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ray-amber/12 text-lg">
-                    {KIND_ICON[a.kind] ?? "✓"}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[0.9rem] font-semibold text-ink">{a.title}</p>
-                    <p className="mt-0.5 text-[0.8rem] leading-snug text-ink-dim">{a.detail}</p>
-                    <p className="mt-1 text-[0.68rem] uppercase tracking-[0.08em] text-ink-faint">{a.timing}</p>
+
+            {/* Time-anchored recovery timeline. */}
+            <div className="relative pl-1">
+              {/* connecting line */}
+              {timeline.length > 1 && (
+                <span
+                  aria-hidden
+                  className="absolute left-[1.4rem] top-3 bottom-3 w-px"
+                  style={{ background: "var(--hairline)" }}
+                />
+              )}
+              <div className="flex flex-col gap-3">
+                {timeline.slice(0, visible).map((a, i) => (
+                  <div key={i} className="slide-in-left relative flex items-start gap-3">
+                    <span className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ray-amber/12 text-base ring-1 ring-[var(--hairline)] backdrop-blur">
+                      {KIND_ICON[a.kind] ?? "✓"}
+                    </span>
+                    <div className="glass min-w-0 flex-1 rounded-2xl p-3.5">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <p className="text-[0.9rem] font-semibold text-ink">{a.title}</p>
+                        <span className="shrink-0 font-display text-[0.78rem] font-bold tabular-nums text-ray-green">
+                          {a.at}
+                        </span>
+                      </div>
+                      <p className="mt-0.5 text-[0.8rem] leading-snug text-ink-dim">{a.detail}</p>
+                      <p className="mt-1 text-[0.68rem] uppercase tracking-[0.08em] text-ink-faint">{a.timing}</p>
+                    </div>
                   </div>
-                  <span className="mt-0.5 shrink-0 text-ray-green">✓</span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
             {visible >= plan.actions.length && (
               <button

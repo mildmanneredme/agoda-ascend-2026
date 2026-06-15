@@ -23,8 +23,12 @@ const schema = {
           title: { type: Type.STRING, description: "Short action title, max 7 words" },
           detail: { type: Type.STRING, description: "One concrete sentence on what was done, max 22 words" },
           timing: { type: Type.STRING, description: "When it happened, e.g. 'the moment the delay posted'" },
+          time: {
+            type: Type.STRING,
+            description: "The single clock time (24h 'HH:MM') this action is anchored to / affects, e.g. the hour the room is held until, the transfer pickup time, the start of lounge access. Use a real time grounded in the scheduled and new departure times.",
+          },
         },
-        required: ["kind", "title", "detail", "timing"],
+        required: ["kind", "title", "detail", "timing", "time"],
       },
     },
   },

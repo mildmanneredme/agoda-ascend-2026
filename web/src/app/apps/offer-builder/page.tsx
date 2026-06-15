@@ -10,6 +10,7 @@ import { loadGuest, styleOf, type GuestProfile } from "@/lib/guest";
 import { personaOf, stayOf } from "@/lib/personas";
 import { useDevTrace } from "@/components/DevTrace";
 import { prettyJson } from "@/lib/trace";
+import LiveReasoning from "@/components/LiveReasoning";
 
 type Offer = {
   bundleName: string;
@@ -25,7 +26,6 @@ type Phase = "intake" | "searching" | "results" | "thinking" | "reveal" | "booke
 
 const THINK_LINES = [
   "Reading guest signals…",
-  "Unbundling the room…",
   "Pricing what matters to you…",
 ];
 
@@ -67,7 +67,11 @@ export default function OfferBuilder() {
   const [thinkStep, setThinkStep] = useState(0);
   const [offer, setOffer] = useState<Offer | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [visibleItems, setVisibleItems] = useState(0);
+  // Progressive reveal: step 1 = bundle name, 2 = tagline, 3.. = one item each.
+  const [revealStep, setRevealStep] = useState(0);
+  const showName = revealStep >= 1;
+  const showTagline = revealStep >= 2;
+  const visibleItems = Math.max(0, revealStep - 2);
   const tickerRun = offer !== null && visibleItems >= offer.items.length;
   const price = usePriceTicker(offer?.total ?? 0, offer?.base ?? 0, tickerRun);
   const abortRef = useRef<AbortController | null>(null);
@@ -91,10 +95,14 @@ export default function OfferBuilder() {
 
   useEffect(() => {
     if (phase !== "reveal" || !offer) return;
-    if (visibleItems >= offer.items.length) return;
-    const t = setTimeout(() => setVisibleItems((v) => v + 1), 420);
+    // total steps: 1 (name) + 1 (tagline) + one per item
+    const lastStep = 2 + offer.items.length;
+    if (revealStep >= lastStep) return;
+    // name lands quickly; tagline a beat later; items pace ~360ms apart.
+    const delay = revealStep === 0 ? 220 : revealStep === 1 ? 380 : 360;
+    const t = setTimeout(() => setRevealStep((v) => v + 1), delay);
     return () => clearTimeout(t);
-  }, [phase, offer, visibleItems]);
+  }, [phase, offer, revealStep]);
 
   function search() {
     setPhase("searching");
@@ -111,7 +119,7 @@ export default function OfferBuilder() {
     setPhase("thinking");
     setThinkStep(0);
     setError(null);
-    setVisibleItems(0);
+    setRevealStep(0);
     abortRef.current?.abort();
     const ctrl = new AbortController();
     abortRef.current = ctrl;
@@ -332,16 +340,12 @@ export default function OfferBuilder() {
 
         {/* ---------- THINKING ---------- */}
         {phase === "thinking" && (
-          <div className="flex flex-col items-start justify-center pt-[22vh]">
-            {THINK_LINES.slice(0, thinkStep + 1).map((line, i) => (
-              <p
-                key={line}
-                className={`rise mb-3 font-display text-lg font-medium ${i === thinkStep ? "text-ink" : "text-ink-faint"}`}
-              >
-                {line}
-              </p>
-            ))}
-            <div className="thinking-dots mt-3 flex gap-1.5">
+          <div className="flex flex-col items-stretch pt-[12vh]">
+            <p className="rise mb-4 font-display text-lg font-medium text-ink">
+              {THINK_LINES[Math.min(thinkStep, THINK_LINES.length - 1)]}
+            </p>
+            <LiveReasoning appKey="offer-builder" active={phase === "thinking"} />
+            <div className="thinking-dots mt-4 flex gap-1.5">
               <span /><span /><span /><span /><span />
             </div>
           </div>
@@ -354,30 +358,48 @@ export default function OfferBuilder() {
               <p className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-ray-aqua">
                 Composed for {guest.name}
               </p>
-              <h2 className="display text-2xl font-bold">{offer.bundleName}</h2>
-              <p className="mt-1 text-[0.85rem] italic text-ink-dim">“{offer.tagline}”</p>
+              <h2 className="display min-h-[2rem] text-2xl font-bold">
+                {showName && <span className="phase-in inline-block">{offer.bundleName}</span>}
+              </h2>
+              <p className="mt-1 min-h-[1.25rem] text-[0.85rem] italic text-ink-dim">
+                {showTagline && <span className="phase-in inline-block">“{offer.tagline}”</span>}
+              </p>
 
               <div className="mt-5 flex items-end justify-between border-t border-hairline pt-4">
                 <div>
                   <p className="text-[0.65rem] uppercase tracking-[0.16em] text-ink-faint">Neural King · per night</p>
-                  <p className="display mt-1 text-4xl font-bold tabular-nums">${tickerRun ? price : offer.base}</p>
+                  <p
+                    key={tickerRun ? "total" : "base"}
+                    className={`display mt-1 text-4xl font-bold tabular-nums ${tickerRun ? "scale-pop" : ""}`}
+                  >
+                    ${tickerRun ? price : offer.base}
+                  </p>
                 </div>
                 {tickerRun && (
-                  <span className="bloom mb-1 rounded-full bg-ray-green/15 px-3 py-1.5 text-xs font-bold text-ray-green">
+                  <span className="scale-pop mb-1 rounded-full bg-ray-green/15 px-3 py-1.5 text-xs font-bold text-ray-green">
                     +{offer.liftPct}% RevPAR
                   </span>
                 )}
               </div>
+
+              {tickerRun && (
+                <p className="phase-in mt-3 border-t border-hairline pt-3 text-[0.74rem] leading-snug text-ink-dim">
+                  Where the value went: a ${offer.base} base room became a ${offer.total} stay —
+                  every extra dollar maps to something {guest.name} actually wanted.
+                </p>
+              )}
             </div>
 
             <div className="flex flex-col gap-2.5">
               {offer.items.slice(0, visibleItems).map((item) => (
-                <div key={item.id} className="bloom glass flex items-center gap-3 rounded-xl px-4 py-3">
+                <div key={item.id} className="slide-in-left glass flex items-center gap-3 rounded-xl px-4 py-3">
                   <div className="min-w-0 flex-1">
                     <p className="text-[0.88rem] font-semibold text-ink">{item.label}</p>
-                    <p className="text-[0.74rem] text-ink-dim">{item.why}</p>
+                    <p className="text-[0.74rem] leading-snug text-ink-dim">
+                      <span className="font-semibold text-ray-aqua">+${item.price}</span>
+                      <span className="text-ink-faint"> · {item.why}</span>
+                    </p>
                   </div>
-                  <span className="display shrink-0 font-semibold text-ray-aqua">+${item.price}</span>
                 </div>
               ))}
             </div>

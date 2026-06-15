@@ -54,7 +54,12 @@ export default function AppHeader({
         <h1 className="display min-w-0 flex-1 truncate text-lg font-semibold">{title}</h1>
         <PillarBadge pillar={pillar} />
         {guest && style && (
-          <Link href="/?choose=1" aria-label="Change guest" className="press shrink-0">
+          <Link
+            href="/?choose=1"
+            aria-label={`${guest.name} · change guest`}
+            title={`${guest.name} · tap to switch`}
+            className="press glass flex shrink-0 items-center gap-1.5 rounded-full py-0.5 pl-0.5 pr-2.5"
+          >
             <PersonaAvatar
               id={guest.personaId ?? ""}
               glyph={style.emoji}
@@ -62,6 +67,9 @@ export default function AppHeader({
               size="h-9 w-9"
               rounded="rounded-full"
             />
+            <span className="max-w-[5.5rem] truncate text-[0.7rem] font-semibold text-ink-dim">
+              {guest.name}
+            </span>
           </Link>
         )}
       </div>

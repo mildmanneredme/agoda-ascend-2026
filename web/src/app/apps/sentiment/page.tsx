@@ -1,9 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AppHeader from "@/components/AppHeader";
 import { useDevTrace } from "@/components/DevTrace";
+import LiveReasoning from "@/components/LiveReasoning";
 import { prettyJson } from "@/lib/trace";
+import { useCountUp } from "@/lib/anim";
 
 const TONE_COLOR: Record<string, string> = {
   red: "var(--ray-red)",
@@ -58,19 +60,55 @@ type Result = {
   _debug?: { prompt: string; rawResponse: string; model: string; latencyMs: number };
 };
 
+/** Score + gradient bar that count up / fill in sync once a result lands. */
+function SentimentGauge({ result }: { result: Result }) {
+  const score = useCountUp(result.score, { durationMs: 900 });
+  return (
+    <div className="bloom glass-deep mb-4 rounded-2xl p-5">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-[0.6rem] uppercase tracking-[0.18em] text-ink-faint">Overall sentiment</p>
+          <p className="display text-xl font-bold capitalize" style={{ color: SENT_STYLE[result.sentiment] }}>
+            {result.sentiment}
+          </p>
+        </div>
+        <p className="display text-3xl font-bold tabular-nums" style={{ color: SENT_STYLE[result.sentiment] }}>
+          {score}
+        </p>
+      </div>
+      <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
+        <div
+          className="h-full rounded-full"
+          style={{ width: `${score}%`, background: `linear-gradient(90deg, var(--ray-red), var(--ray-amber) 50%, var(--ray-green))` }}
+        />
+      </div>
+      <p className="mt-3 text-[0.85rem] italic text-ink-dim">“{result.headline}”</p>
+    </div>
+  );
+}
+
 export default function SentimentLab() {
   const { record } = useDevTrace();
   const [review, setReview] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Auto-dismiss the celebratory toast ~2.5s after it appears (timer = external system).
+  useEffect(() => {
+    if (!toast) return;
+    const id = setTimeout(() => setToast(null), 2500);
+    return () => clearTimeout(id);
+  }, [toast]);
 
   async function analyze(text: string) {
     if (!text.trim() || busy) return;
     setBusy(true);
     setError(null);
     setResult(null);
+    setToast(null);
     abortRef.current?.abort();
     const ctrl = new AbortController();
     abortRef.current = ctrl;
@@ -84,6 +122,8 @@ export default function SentimentLab() {
       if (!res.ok) throw new Error(await res.text());
       const data = (await res.json()) as Result;
       setResult(data);
+      // Celebratory toast fires only when a positive review earns staff kudos.
+      if (data.staffKudos) setToast(`Kudos sent to ${data.staffKudos.team} 🎉`);
       record({
         appKey: "sentiment",
         title: `Decomposed a review into ${data.actions?.length ?? 0} dispatched tasks`,
@@ -112,6 +152,19 @@ export default function SentimentLab() {
   return (
     <main className="relative min-h-dvh overflow-hidden">
       <AppHeader title="Sentiment Lab" pillar="human-edge" />
+
+      {/* celebratory toast — positive reviews only, auto-fades */}
+      {toast && (
+        <div
+          className="toast-in fixed inset-x-0 top-20 z-50 flex justify-center px-5"
+          role="status"
+          aria-live="polite"
+        >
+          <div className="glass-deep flex items-center gap-2 rounded-full border border-ray-green/40 bg-ray-green/15 px-4 py-2.5 text-[0.82rem] font-semibold text-ray-green shadow-lg">
+            {toast}
+          </div>
+        </div>
+      )}
 
       <div className="relative z-10 px-5 pb-24">
         <p className="rise mb-1 text-xs font-semibold uppercase tracking-[0.24em] text-ray-magenta">
@@ -158,37 +211,21 @@ export default function SentimentLab() {
         )}
 
         {busy && (
-          <div className="mt-6 flex items-center gap-2 text-ink-dim">
-            <span className="thinking-dots flex gap-1.5">
-              <span /><span /><span /><span /><span />
-            </span>
-            <span className="text-sm">Reading between the lines…</span>
+          <div className="mt-6">
+            <div className="mb-3 flex items-center gap-2 text-ink-dim">
+              <span className="thinking-dots flex gap-1.5">
+                <span /><span /><span /><span /><span />
+              </span>
+              <span className="text-sm">Reading between the lines…</span>
+            </div>
+            <LiveReasoning appKey="sentiment" active={busy} />
           </div>
         )}
 
         {result && (
           <div className="mt-6">
-            {/* sentiment gauge */}
-            <div className="bloom glass-deep mb-4 rounded-2xl p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[0.6rem] uppercase tracking-[0.18em] text-ink-faint">Overall sentiment</p>
-                  <p className="display text-xl font-bold capitalize" style={{ color: SENT_STYLE[result.sentiment] }}>
-                    {result.sentiment}
-                  </p>
-                </div>
-                <p className="display text-3xl font-bold tabular-nums" style={{ color: SENT_STYLE[result.sentiment] }}>
-                  {result.score}
-                </p>
-              </div>
-              <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
-                <div
-                  className="h-full rounded-full"
-                  style={{ width: `${result.score}%`, background: `linear-gradient(90deg, var(--ray-red), var(--ray-amber) 50%, var(--ray-green))` }}
-                />
-              </div>
-              <p className="mt-3 text-[0.85rem] italic text-ink-dim">“{result.headline}”</p>
-            </div>
+            {/* sentiment gauge — score counts up, bar fills in sync */}
+            <SentimentGauge result={result} />
 
             {/* aspects */}
             <div className="mb-4 flex flex-wrap gap-2">
@@ -206,7 +243,7 @@ export default function SentimentLab() {
 
             {/* staff kudos — positive reviews only */}
             {result.staffKudos && (
-              <div className="bloom mb-4 rounded-2xl border border-ray-green/30 bg-ray-green/10 p-4">
+              <div className="foil scale-pop mb-4 overflow-hidden rounded-2xl border border-ray-green/30 bg-ray-green/10 p-4">
                 <div className="mb-1 flex items-center gap-2">
                   <span className="text-base">🎉</span>
                   <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-ray-green">
@@ -221,17 +258,21 @@ export default function SentimentLab() {
             <p className="mb-2 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-ray-magenta">
               Dispatched to teams
             </p>
-            <div className="stagger flex flex-col gap-2.5">
+            <div className="flex flex-col gap-2.5">
               {result.actions?.map((a, i) => {
                 const ps = PRIORITY_STYLE[a.priority] ?? PRIORITY_STYLE.normal;
                 return (
-                  <div key={i} className="glass flex items-start gap-3 rounded-2xl p-4">
+                  <div
+                    key={i}
+                    className="slide-in-left glass flex items-start gap-3 rounded-2xl p-4"
+                    style={{ animationDelay: `${i * 0.11}s` }}
+                  >
                     <div className="min-w-0 flex-1">
                       <div className="mb-1 flex items-center gap-2">
                         <span className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-ink">{a.department}</span>
                         <span
-                          className="rounded-full px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-[0.1em]"
-                          style={{ background: ps.bg, color: ps.fg }}
+                          className="glow-flash rounded-full px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-[0.1em]"
+                          style={{ background: ps.bg, color: ps.fg, ["--flash" as string]: ps.fg, animationDelay: `${i * 0.11 + 0.3}s` }}
                         >
                           {a.priority}
                         </span>

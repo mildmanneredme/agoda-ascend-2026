@@ -124,7 +124,7 @@ function OnboardingInner() {
         </Link>
       </div>
 
-      <div className="pb-safe relative z-10 flex flex-1 flex-col justify-end px-6">
+      <div key={stage} className="phase-in pb-safe relative z-10 flex flex-1 flex-col justify-end px-6">
         {stage === "welcome" && (
           <div className="stagger mb-6">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-ray-aqua">

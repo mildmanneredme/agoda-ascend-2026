@@ -68,6 +68,61 @@ function actionCard(action: Action): { title: string; body: string } {
   }
 }
 
+/**
+ * A booked action, confirmed as an *event*: a brief processing ring → a checkmark
+ * landing with a one-shot green glow → the card settles. Staggered by `index` so
+ * multiple actions arriving together confirm in sequence rather than all at once.
+ * Honours prefers-reduced-motion (skips straight to the confirmed state).
+ */
+function ActionCard({ action, index }: { action: Action; index: number }) {
+  const card = actionCard(action);
+  const [confirmed, setConfirmed] = useState(false);
+
+  useEffect(() => {
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    // reduced motion → confirm immediately; otherwise stagger each action a beat later
+    const delay = reduce ? 0 : 520 + index * 420;
+    const t = setTimeout(() => setConfirmed(true), delay);
+    return () => clearTimeout(t);
+  }, [index]);
+
+  return (
+    <div
+      style={confirmed ? ({ "--flash": "var(--ray-green)" } as React.CSSProperties) : undefined}
+      className={`bloom mt-2 flex items-center gap-3 rounded-2xl border px-4 py-3 transition-colors duration-300 ${
+        confirmed
+          ? "glow-flash border-ray-green/35 bg-ray-green/10"
+          : "border-ray-amber/30 bg-ray-amber/[0.06]"
+      }`}
+    >
+      <span
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+          confirmed ? "bg-ray-green/20 text-ray-green" : "bg-ray-amber/15 text-ray-amber"
+        }`}
+      >
+        {confirmed ? (
+          <span className="scale-pop text-[0.95rem] leading-none">✓</span>
+        ) : (
+          <span
+            className="block h-4 w-4 animate-spin rounded-full border-2 border-ray-amber/30 border-t-ray-amber motion-reduce:animate-none"
+            aria-hidden
+          />
+        )}
+      </span>
+      <div className="min-w-0">
+        <p className="text-[0.85rem] font-semibold text-ink">
+          {confirmed ? card.title : "Confirming…"}
+        </p>
+        {confirmed
+          ? card.body && <p className="text-[0.74rem] text-ink-dim">{card.body}</p>
+          : <p className="text-[0.74rem] text-ink-dim">Reaching the team</p>}
+      </div>
+    </div>
+  );
+}
+
 export default function Concierge() {
   const router = useRouter();
   const { record } = useDevTrace();
@@ -75,6 +130,10 @@ export default function Concierge() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  // first-token latency beat: true after send, false once text starts streaming
+  const [isComposing, setIsComposing] = useState(false);
+  // index of the message that is actively streaming (gets the live caret); -1 when idle
+  const [streamingIdx, setStreamingIdx] = useState(-1);
   const [nudgeAnswered, setNudgeAnswered] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -145,7 +204,9 @@ export default function Concierge() {
     if (!text.trim() || busy || !guest) return;
     setInput("");
     setBusy(true);
+    setIsComposing(true); // first-token latency beat
     const history = [...messages, { role: "user" as const, text: text.trim() }];
+    const streamIndex = history.length; // the empty model bubble we're about to push
     setMessages([...history, { role: "model", text: "" }]);
 
     try {
@@ -169,7 +230,12 @@ export default function Concierge() {
       for (;;) {
         const { done, value } = await reader.read();
         if (done) break;
-        if (!firstTokenMs) firstTokenMs = performance.now() - t0;
+        if (!firstTokenMs) {
+          firstTokenMs = performance.now() - t0;
+          // text is arriving: drop the "composing" beat, light up the live caret
+          setIsComposing(false);
+          setStreamingIdx(streamIndex);
+        }
         full += decoder.decode(value, { stream: true });
         const visible = visibleOf(full);
         setMessages((m) => {
@@ -261,6 +327,8 @@ export default function Concierge() {
       });
     } finally {
       setBusy(false);
+      setIsComposing(false);
+      setStreamingIdx(-1); // stream done — remove the live caret
     }
   }
 
@@ -284,10 +352,16 @@ export default function Concierge() {
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 pt-2">
         <div className="mx-auto flex max-w-lg flex-col gap-3 pb-4">
-          {messages.map((msg, i) => (
+          {messages.map((msg, i) => {
+            const isStreaming = i === streamingIdx && !!msg.text;
+            const isComposingHere = isComposing && i === messages.length - 1 && !msg.text;
+            return (
             <div key={i} className={msg.role === "user" ? "self-end" : "self-start"}>
               <div
+                style={isStreaming ? ({ "--caret": "var(--ray-amber)" } as React.CSSProperties) : undefined}
                 className={`max-w-[82vw] rounded-2xl px-4 py-3 text-[0.92rem] leading-relaxed ${
+                  isStreaming ? "stream-caret" : ""
+                } ${
                   msg.role === "user"
                     ? "rounded-br-md bg-ink text-abyss"
                     : msg.nudge
@@ -300,7 +374,18 @@ export default function Concierge() {
                     Proactive · before you asked
                   </p>
                 )}
-                {msg.text || (
+                {msg.text ? (
+                  msg.text
+                ) : isComposingHere ? (
+                  <span className="flex items-center gap-2 py-1">
+                    <span className="thinking-dots flex gap-1.5">
+                      <span /><span /><span /><span /><span />
+                    </span>
+                    <span className="text-[0.72rem] uppercase tracking-[0.16em] text-ray-amber">
+                      concierge is composing…
+                    </span>
+                  </span>
+                ) : (
                   <span className="thinking-dots flex gap-1.5 py-1">
                     <span /><span /><span /><span /><span />
                   </span>
@@ -322,25 +407,12 @@ export default function Concierge() {
                   </div>
                 )}
               </div>
-              {msg.actions?.map((action, j) => {
-                const card = actionCard(action);
-                return (
-                  <div
-                    key={j}
-                    className="bloom mt-2 flex items-center gap-3 rounded-2xl border border-ray-green/35 bg-ray-green/10 px-4 py-3"
-                  >
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ray-green/20 text-ray-green">
-                      ✓
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-[0.85rem] font-semibold text-ink">{card.title}</p>
-                      {card.body && <p className="text-[0.74rem] text-ink-dim">{card.body}</p>}
-                    </div>
-                  </div>
-                );
-              })}
+              {msg.actions?.map((action, j) => (
+                <ActionCard key={j} action={action} index={j} />
+              ))}
             </div>
-          ))}
+          );
+          })}
         </div>
       </div>
 

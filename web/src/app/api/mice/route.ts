@@ -27,7 +27,7 @@ const proposeSchema = {
   type: Type.OBJECT,
   properties: {
     title: { type: Type.STRING, description: "A proposal title naming the client's event, max 8 words" },
-    pitch: { type: Type.STRING, description: "Two-sentence opening that shows we understood the brief and their answers" },
+    pitch: { type: Type.STRING, description: "Two-sentence opening. The FIRST sentence MUST echo back the key constraints the planner gave (e.g. 'For a premium offsite of up to 150 over one evening…'), naming their headcount, format, budget tier or any preferences they answered. If an answer was blank, fall back to the constraints stated in the enquiry. The second sentence sets up the recommendation." },
     delegates: { type: Type.INTEGER, description: "Number of attendees" },
     days: { type: Type.INTEGER, description: "Number of event days (default 1)" },
     spaceId: { type: Type.STRING, description: "The recommended event space id from the inventory, verbatim" },
@@ -110,7 +110,7 @@ ${rfp}
     ? `\n\nPLANNER'S ANSWERS TO YOUR QUESTIONS:\n${answers.map((a: { question: string; answer: string }) => `- ${a.question} → ${a.answer || "(no preference)"}`).join("\n")}`
     : "";
 
-  const prompt = `You are the Staff Co-Pilot for the events team at ${HOTEL.name}. Using the enquiry AND the planner's answers, produce a complete first-draft proposal in one pass: recommend the single best space (your PRIMARY pick), sketch a day agenda, list priced extras beyond the day-delegate rate, give exactly TWO alternative directions the planner could choose instead, and write a draft reply email. Match the space to the headcount (never propose a room that can't hold them). Reflect the planner's answers explicitly.
+  const prompt = `You are the Staff Co-Pilot for the events team at ${HOTEL.name}. Using the enquiry AND the planner's answers, produce a complete first-draft proposal in one pass: recommend the single best space (your PRIMARY pick), sketch a day agenda, list priced extras beyond the day-delegate rate, give exactly TWO alternative directions the planner could choose instead, and write a draft reply email. Match the space to the headcount (never propose a room that can't hold them). Reflect the planner's answers explicitly — open the pitch by echoing the key constraints they gave back to them. If an answer was left blank, fall back gracefully to what the enquiry already states; never invent constraints the planner didn't give.
 
 ${miceBrief()}
 

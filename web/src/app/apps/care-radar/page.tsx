@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
 import AppHeader from "@/components/AppHeader";
 import PersonaAvatar from "@/components/PersonaAvatar";
+import LiveReasoning from "@/components/LiveReasoning";
 import { useDevTrace } from "@/components/DevTrace";
 import { prettyJson } from "@/lib/trace";
 import {
@@ -36,6 +37,8 @@ type Read = {
   doNow: string[];
   restraint: string[];
   guestReply: string;
+  language?: string;
+  flag?: string;
   sensitivityFlag: boolean;
   _debug?: { prompt: string; rawResponse: string; model: string; latencyMs: number };
 };
@@ -167,6 +170,7 @@ export default function CareRadar() {
           ) : (
             <Roster onSelect={select} />
           )}
+          {can3d && <GestureHint />}
           {can3d && (
             <p className="pointer-events-none absolute inset-x-0 bottom-2 text-center text-[0.64rem] uppercase tracking-[0.18em] text-ink-faint">
               drag to rotate · up/down to climb · two fingers to zoom
@@ -242,6 +246,73 @@ function StatusBar() {
   );
 }
 
+const GESTURE_FLAG = "care-radar-gestures-seen";
+
+/**
+ * First-visit gesture coaching over the 3D board. Shows an animated hint that
+ * fades out after ~3s or on the first pointer interaction, then never returns
+ * (a flag is persisted to localStorage). Skipped if already seen.
+ */
+function GestureHint() {
+  // read the persisted flag once, lazily (render-safe — read only).
+  const [show, setShow] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return localStorage.getItem(GESTURE_FLAG) !== "1";
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    if (!show) return;
+    try {
+      localStorage.setItem(GESTURE_FLAG, "1");
+    } catch {
+      /* ignore */
+    }
+    const dismiss = () => setShow(false);
+    const timer = window.setTimeout(dismiss, 3000);
+    window.addEventListener("pointerdown", dismiss, { once: true });
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("pointerdown", dismiss);
+    };
+  }, [show]);
+
+  if (!show) return null;
+
+  const moves: { glyph: string; label: string }[] = [
+    { glyph: "↻", label: "drag to rotate" },
+    { glyph: "↕", label: "up / down to climb floors" },
+    { glyph: "⤢", label: "pinch to zoom" },
+  ];
+  return (
+    <div
+      className="bloom pointer-events-none absolute inset-0 z-10 flex items-center justify-center"
+      style={{ background: "color-mix(in srgb, var(--abyss) 38%, transparent)" }}
+    >
+      <div className="glass-deep flex flex-col gap-3 rounded-3xl px-6 py-5">
+        {moves.map((m, i) => (
+          <div
+            key={m.label}
+            className="slide-in-left flex items-center gap-3"
+            style={{ animationDelay: `${0.1 + i * 0.12}s` }}
+          >
+            <span
+              className="flex h-9 w-9 items-center justify-center rounded-full text-lg font-bold"
+              style={{ background: "color-mix(in srgb, var(--ray-magenta) 22%, transparent)", color: "var(--ray-magenta)" }}
+            >
+              {m.glyph}
+            </span>
+            <span className="text-[0.82rem] font-semibold text-ink">{m.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // Static fallback when WebGL is unavailable or reduced-motion is set.
 function Roster({ onSelect }: { onSelect: (id: string) => void }) {
   const sorted = [...IN_HOUSE].sort(byUrgency);
@@ -291,6 +362,9 @@ function Profile({
 }) {
   const c = CARE_COLOR[guest.status];
   const intensity = read?.intensity ?? guest.intensity;
+  // Robust multilingual "tell": only when a non-English language is detected.
+  const lang = read?.language?.trim();
+  const speaksOther = !!lang && lang.toLowerCase() !== "english";
   return (
     <div className="bloom fixed inset-0 z-50 overflow-y-auto bg-abyss/92 backdrop-blur-xl">
       <div className="pt-safe sticky top-0 z-10 flex items-center gap-3 px-5 pb-3 pt-3 backdrop-blur-xl">
@@ -312,6 +386,12 @@ function Profile({
           <div className="min-w-0 flex-1">
             <h2 className="display truncate text-xl font-bold text-ink">{guest.name}</h2>
             <p className="text-[0.78rem] text-ink-dim">Room {guest.room} · {guest.party} · {guest.nights}</p>
+            {speaksOther && (
+              <span className="scale-pop mt-1 inline-flex items-center gap-1 rounded-full border border-hairline px-2 py-0.5 text-[0.62rem] font-semibold text-ink-dim">
+                {read?.flag ? <span aria-hidden>{read.flag}</span> : null}
+                <span>Replies in {lang}</span>
+              </span>
+            )}
           </div>
           <span
             className="shrink-0 rounded-full px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-[0.1em]"
@@ -322,9 +402,12 @@ function Profile({
         </div>
 
         {busy && (
-          <div className="mt-6 flex items-center gap-2 text-ink-dim">
-            <span className="thinking-dots flex gap-1.5"><span /><span /><span /><span /><span /></span>
-            <span className="text-sm">Reading the room…</span>
+          <div className="mt-4 flex flex-col gap-3">
+            <div className="flex items-center gap-2 text-ink-dim">
+              <span className="thinking-dots flex gap-1.5"><span /><span /><span /><span /><span /></span>
+              <span className="text-sm">Reading the room…</span>
+            </div>
+            <LiveReasoning appKey="care-radar" active={busy} />
           </div>
         )}
 

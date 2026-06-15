@@ -8,19 +8,30 @@ import { loadGuest, styleOf, type GuestProfile } from "@/lib/guest";
 import { personaOf, signalsOf } from "@/lib/personas";
 import { useDevTrace } from "@/components/DevTrace";
 import { prettyJson } from "@/lib/trace";
+import LiveReasoning from "@/components/LiveReasoning";
+import { useCountUp } from "@/lib/anim";
+
+type Preference = {
+  label: string;
+  confidence: number;
+  signal: string;
+  reasoning: string;
+  action: string;
+};
 
 type Memory = {
   greeting: string;
   tier: string;
-  preferences: Array<{
-    label: string;
-    confidence: number;
-    signal: string;
-    reasoning: string;
-    action: string;
-  }>;
+  preferences: Preference[];
   _debug?: { prompt: string; rawResponse: string; model: string; latencyMs: number };
 };
+
+/** Bucket a confidence score onto the brand traffic-light tokens. */
+function confidenceColor(c: number): string {
+  if (c >= 85) return "var(--ray-green)";
+  if (c >= 70) return "var(--ray-amber)";
+  return "var(--ray-red)";
+}
 
 export default function MemoryEngine() {
   const router = useRouter();
@@ -86,14 +97,15 @@ export default function MemoryEngine() {
 
   if (!guest) return null;
   const style = styleOf(guest);
+  const loading = !memory && !error;
 
   return (
     <main className="relative min-h-dvh overflow-hidden">
       <AppHeader title="Guest Memory" pillar="know-me" />
 
       <div className="relative z-10 px-5 pb-safe">
-        {!memory && !error && (
-          <div className="flex flex-col items-center pt-[20vh] text-center">
+        {loading && (
+          <div className="flex flex-col items-center pt-[14vh] text-center">
             <p className="rise display mb-2 text-lg font-medium text-ink">
               Recalling everything we know about you…
             </p>
@@ -101,6 +113,7 @@ export default function MemoryEngine() {
             <div className="thinking-dots mt-5 flex gap-1.5">
               <span /><span /><span /><span /><span />
             </div>
+            <LiveReasoning appKey="memory-engine" active={loading} className="mt-7 w-full text-left" />
           </div>
         )}
 
@@ -162,72 +175,14 @@ export default function MemoryEngine() {
             </div>
 
             <div className="stagger flex flex-col gap-3">
-              {memory.preferences.map((pref, i) => {
-                const expanded = open === i;
-                return (
-                  <button
-                    key={pref.label}
-                    onClick={() => setOpen(expanded ? null : i)}
-                    className={`press rounded-2xl p-4 text-left transition-all ${
-                      expanded ? "glass-deep" : "glass"
-                    }`}
-                    style={expanded ? { borderColor: "rgba(75,234,234,0.4)" } : undefined}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[0.92rem] font-semibold text-ink">{pref.label}</p>
-                        <div className="mt-2 flex items-center gap-2">
-                          <div className="h-1 w-24 overflow-hidden rounded-full bg-white/10">
-                            <div
-                              className="h-full rounded-full"
-                              style={{
-                                width: `${pref.confidence}%`,
-                                background:
-                                  "linear-gradient(90deg, var(--ray-cyan), var(--ray-aqua))",
-                              }}
-                            />
-                          </div>
-                          <span className="text-[0.68rem] font-semibold tabular-nums text-ray-aqua">
-                            {pref.confidence}%
-                          </span>
-                        </div>
-                      </div>
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 16 16"
-                        fill="none"
-                        className={`shrink-0 text-ink-faint transition-transform ${expanded ? "rotate-180" : ""}`}
-                      >
-                        <path d="M3 6l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </div>
-
-                    {expanded && (
-                      <div className="rise mt-4 flex flex-col gap-3 border-t border-hairline pt-4">
-                        <div>
-                          <p className="mb-1 text-[0.6rem] font-bold uppercase tracking-[0.18em] text-ray-amber">
-                            Signal observed
-                          </p>
-                          <p className="text-[0.82rem] leading-relaxed text-ink-dim">{pref.signal}</p>
-                        </div>
-                        <div>
-                          <p className="mb-1 text-[0.6rem] font-bold uppercase tracking-[0.18em] text-ray-cyan">
-                            How the AI reasons
-                          </p>
-                          <p className="text-[0.82rem] leading-relaxed text-ink-dim">{pref.reasoning}</p>
-                        </div>
-                        <div>
-                          <p className="mb-1 text-[0.6rem] font-bold uppercase tracking-[0.18em] text-ray-green">
-                            Already done
-                          </p>
-                          <p className="text-[0.82rem] leading-relaxed text-ink">{pref.action}</p>
-                        </div>
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
+              {memory.preferences.map((pref, i) => (
+                <PreferenceCard
+                  key={pref.label}
+                  pref={pref}
+                  expanded={open === i}
+                  onToggle={() => setOpen(open === i ? null : i)}
+                />
+              ))}
             </div>
 
             <p className="mt-6 pb-4 text-center text-[0.7rem] leading-relaxed text-ink-faint">
@@ -239,5 +194,134 @@ export default function MemoryEngine() {
         )}
       </div>
     </main>
+  );
+}
+
+/** Animated circular confidence ring; fill colour shifts red→amber→green. */
+function ConfidenceRing({ confidence }: { confidence: number }) {
+  const value = useCountUp(confidence, { durationMs: 900 });
+  const color = confidenceColor(confidence);
+  const size = 44;
+  const stroke = 4;
+  const r = (size - stroke) / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ * (1 - Math.max(0, Math.min(100, value)) / 100);
+  return (
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke="rgba(255,255,255,0.1)"
+          strokeWidth={stroke}
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke={color}
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={circ}
+          strokeDashoffset={offset}
+          style={{ filter: `drop-shadow(0 0 4px ${color})` }}
+        />
+      </svg>
+      <span
+        className="absolute inset-0 flex items-center justify-center text-[0.62rem] font-bold tabular-nums"
+        style={{ color }}
+      >
+        {Math.round(value)}
+      </span>
+    </div>
+  );
+}
+
+function PreferenceCard({
+  pref,
+  expanded,
+  onToggle,
+}: {
+  pref: Preference;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  const color = confidenceColor(pref.confidence);
+  return (
+    <button
+      onClick={onToggle}
+      className={`press rounded-2xl p-4 text-left transition-all ${expanded ? "glass-deep" : "glass"}`}
+      style={expanded ? { borderColor: "rgba(75,234,234,0.4)" } : undefined}
+    >
+      <div className="flex items-center gap-3">
+        <ConfidenceRing confidence={pref.confidence} />
+        <div className="min-w-0 flex-1">
+          <p className="text-[0.92rem] font-semibold text-ink">{pref.label}</p>
+          <p className="mt-0.5 text-[0.66rem] font-medium" style={{ color }}>
+            We&apos;re {pref.confidence}% sure
+          </p>
+        </div>
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 16 16"
+          fill="none"
+          className={`shrink-0 text-ink-faint transition-transform ${expanded ? "rotate-180" : ""}`}
+        >
+          <path d="M3 6l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
+
+      {expanded && (
+        <div className="rise mt-4 border-t border-hairline pt-4">
+          {/* signal ⟶ inference visual mapping */}
+          <div className="flex items-stretch gap-3">
+            <div className="flex flex-col items-center pt-1">
+              <span
+                className="block h-2 w-2 shrink-0 rounded-full"
+                style={{ background: "var(--ray-amber)", boxShadow: "0 0 6px var(--ray-amber)" }}
+              />
+              <span
+                className="my-1 w-px flex-1"
+                style={{ background: "linear-gradient(var(--ray-amber), var(--ray-cyan))" }}
+              />
+              <span
+                className="block h-2 w-2 shrink-0 rounded-full"
+                style={{ background: "var(--ray-cyan)", boxShadow: "0 0 6px var(--ray-cyan)" }}
+              />
+            </div>
+            <div className="flex flex-1 flex-col gap-3">
+              <div>
+                <p className="mb-1 text-[0.6rem] font-bold uppercase tracking-[0.18em] text-ray-amber">
+                  Signal observed
+                </p>
+                <p className="text-[0.82rem] leading-relaxed text-ink-dim">{pref.signal}</p>
+              </div>
+              <div className="flex items-center gap-1.5 text-[0.6rem] font-bold uppercase tracking-[0.18em] text-ink-faint">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden>
+                  <path d="M3 8h9m0 0l-3-3m3 3l-3 3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>inferred</span>
+              </div>
+              <div>
+                <p className="mb-1 text-[0.6rem] font-bold uppercase tracking-[0.18em] text-ray-cyan">
+                  {pref.label}
+                </p>
+                <p className="text-[0.82rem] leading-relaxed text-ink-dim">{pref.reasoning}</p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-3 border-t border-hairline pt-3">
+            <p className="mb-1 text-[0.6rem] font-bold uppercase tracking-[0.18em] text-ray-green">
+              Already done
+            </p>
+            <p className="text-[0.82rem] leading-relaxed text-ink">{pref.action}</p>
+          </div>
+        </div>
+      )}
+    </button>
   );
 }

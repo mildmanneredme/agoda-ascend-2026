@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AscendLogo } from "@/components/Wordmark";
 import { PILLARS, type PillarKey } from "@/components/AppHeader";
 import PersonaAvatar from "@/components/PersonaAvatar";
 import { loadGuest, styleOf, type GuestProfile } from "@/lib/guest";
+import { personaOf, stayOf } from "@/lib/personas";
 
 type SandboxApp = {
   href?: string;
@@ -70,10 +71,33 @@ const APPS: SandboxApp[] = [
 
 const PILLAR_ORDER: PillarKey[] = ["know-me", "already-handled", "human-edge"];
 
+// Per-persona "we already prepared for you" payoff line — proves the hotel knew them.
+const PERSONA_DETAIL: Record<string, string> = {
+  elena: "Your high-floor neural king is ready — late checkout approved.",
+  marcus: "Connecting rooms held, kids' breakfast set for 7am, pool's open.",
+  aiko: "A quiet room away from the lift is held — blackout curtains, fast wifi.",
+  priya: "River-view room, a spa slot pencilled in, breakfast left open and slow.",
+  lucas: "The riverside Thai-Isan table you loved is rebooked for 21:30.",
+  jordan: "Sunrise paddle and a night-market route are queued with our partners.",
+};
+
+/** One personalized detail line for the hub greeting cascade. */
+function greetingDetail(guest: GuestProfile): string {
+  const persona = personaOf(guest);
+  if (persona) {
+    return PERSONA_DETAIL[persona.id] ?? persona.tagline;
+  }
+  const style = styleOf(guest);
+  const stay = stayOf(guest);
+  return `We've primed The Grand Neural around how you travel — ${style.label.toLowerCase()} — for your ${stay.nights}-night stay.`;
+}
+
 export default function Hub() {
   const router = useRouter();
   const [guest, setGuest] = useState<GuestProfile | null>(null);
   const [ready, setReady] = useState(false);
+  const [cardOpen, setCardOpen] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const g = loadGuest();
@@ -85,8 +109,28 @@ export default function Hub() {
     setReady(true);
   }, [router]);
 
+  // Close the identity card on outside tap / Escape.
+  useEffect(() => {
+    if (!cardOpen) return;
+    function onDown(e: PointerEvent) {
+      if (cardRef.current && !cardRef.current.contains(e.target as Node)) setCardOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setCardOpen(false);
+    }
+    document.addEventListener("pointerdown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [cardOpen]);
+
   if (!ready || !guest) return null;
   const style = styleOf(guest);
+  const persona = personaOf(guest);
+  const signal = persona?.signals[0];
+  const roleLabel = persona?.role ?? style.label;
 
   return (
     <main className="relative min-h-dvh overflow-hidden pb-12">
@@ -96,23 +140,72 @@ export default function Hub() {
           <Link href="/" aria-label="Back to home" className="press">
             <AscendLogo height={28} />
           </Link>
-          <Link
-            href="/?choose=1"
-            aria-label="Change guest"
-            className="press glass flex items-center gap-2 rounded-full py-1 pl-1 pr-3.5 text-[0.7rem] font-semibold text-ink-dim"
-          >
-            <PersonaAvatar
-              id={guest.personaId ?? ""}
-              glyph={style.emoji}
-              color={style.color}
-              size="h-8 w-8"
-              rounded="rounded-full"
-            />
-            {guest.name}
-          </Link>
+          <div ref={cardRef} className="relative shrink-0">
+            <button
+              type="button"
+              onClick={() => setCardOpen((o) => !o)}
+              aria-haspopup="dialog"
+              aria-expanded={cardOpen}
+              aria-label="Your profile"
+              className="press glass flex items-center gap-2 rounded-full py-1 pl-1 pr-3.5 text-[0.7rem] font-semibold text-ink-dim"
+            >
+              <PersonaAvatar
+                id={guest.personaId ?? ""}
+                glyph={style.emoji}
+                color={style.color}
+                size="h-8 w-8"
+                rounded="rounded-full"
+              />
+              {guest.name}
+            </button>
+
+            {cardOpen && (
+              <div
+                role="dialog"
+                aria-label={`${guest.name}'s profile`}
+                className="bloom glass-deep absolute right-0 top-[calc(100%+0.6rem)] z-50 w-72 rounded-2xl p-4 text-left shadow-[0_18px_50px_rgba(0,0,0,0.5)]"
+                style={{ boxShadow: `inset 2px 0 0 ${style.color}` }}
+              >
+                <div className="flex items-center gap-3">
+                  <PersonaAvatar
+                    id={guest.personaId ?? ""}
+                    glyph={style.emoji}
+                    color={style.color}
+                    size="h-12 w-12"
+                    rounded="rounded-xl"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="display truncate text-base font-semibold text-ink">{guest.name}</p>
+                    <p className="truncate text-[0.7rem] font-semibold uppercase tracking-[0.1em]" style={{ color: style.color }}>
+                      {roleLabel}
+                    </p>
+                  </div>
+                </div>
+
+                {signal && (
+                  <div className="mt-3 rounded-xl border border-hairline p-3">
+                    <p className="mb-1 text-[0.58rem] font-bold uppercase tracking-[0.16em] text-ink-faint">
+                      On file
+                    </p>
+                    <p className="text-[0.78rem] leading-snug text-ink-dim">{signal}</p>
+                  </div>
+                )}
+
+                <Link
+                  href="/?choose=1"
+                  className="press mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-ink py-2.5 font-display text-[0.82rem] font-semibold text-abyss"
+                >
+                  Be someone else
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                    <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
 
-        <header className="rise mb-9">
+        <header className="stagger mb-9">
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.28em] text-ray-aqua">
             The Grand Neural · Bangkok
           </p>
@@ -120,7 +213,16 @@ export default function Hub() {
             Good to see you,{" "}
             <span className="prism-text">{guest.name}</span>.
           </h1>
-          <p className="mt-3 max-w-[36ch] text-sm leading-relaxed text-ink-dim">
+          <p
+            className="mt-3 max-w-[36ch] font-display text-[0.95rem] font-medium leading-relaxed text-ink"
+            style={{ animationDelay: "0.42s" }}
+          >
+            {greetingDetail(guest)}
+          </p>
+          <p
+            className="mt-3 max-w-[36ch] text-sm leading-relaxed text-ink-dim"
+            style={{ animationDelay: "0.62s" }}
+          >
             Seven ways this hotel thinks ahead of you. All live — start anywhere.
           </p>
         </header>
