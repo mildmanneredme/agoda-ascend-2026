@@ -7,6 +7,7 @@ type DevTraceValue = {
   trace: Trace | null;
   seq: number; // increments each record — lets the cog pulse on fresh data
   record: (trace: Trace) => void;
+  clear: () => void; // drop the per-app trace so the X-ray reverts to the sandbox-wide overview
   open: boolean;
   setOpen: (open: boolean) => void;
 };
@@ -23,9 +24,13 @@ export function DevTraceProvider({ children }: { children: React.ReactNode }) {
     setSeq((s) => s + 1);
   }, []);
 
+  // revert to the sandbox-wide overview (no per-app trace). Doesn't bump seq, so
+  // it never fires the peel-corner "fresh result" pulse — it's a quiet reset.
+  const clear = useCallback(() => setTrace(null), []);
+
   const value = useMemo(
-    () => ({ trace, seq, record, open, setOpen }),
-    [trace, seq, open]
+    () => ({ trace, seq, record, clear, open, setOpen }),
+    [trace, seq, record, clear, open]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

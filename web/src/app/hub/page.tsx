@@ -8,6 +8,7 @@ import { PILLARS, type PillarKey } from "@/components/AppHeader";
 import PersonaAvatar from "@/components/PersonaAvatar";
 import { loadGuest, styleOf, type GuestProfile } from "@/lib/guest";
 import { personaOf, stayOf } from "@/lib/personas";
+import { useDevTrace } from "@/components/DevTrace";
 
 type SandboxApp = {
   href?: string;
@@ -98,6 +99,7 @@ export default function Hub() {
   const [ready, setReady] = useState(false);
   const [cardOpen, setCardOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const { clear } = useDevTrace();
 
   useEffect(() => {
     const g = loadGuest();
@@ -108,6 +110,12 @@ export default function Hub() {
     setGuest(g);
     setReady(true);
   }, [router]);
+
+  // Back on the main screen: drop the last app's trace so the X-ray reverts to
+  // the sandbox-wide overview (the full range of agents on call).
+  useEffect(() => {
+    clear();
+  }, [clear]);
 
   // Close the identity card on outside tap / Escape.
   useEffect(() => {
