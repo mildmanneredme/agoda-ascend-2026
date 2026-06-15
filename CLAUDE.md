@@ -161,11 +161,11 @@ Root directory = `web/`. Set `GEMINI_API_KEY`. Generated media is committed unde
 - `/api/offer`
 - `/api/sentiment`
 
-### Components (10)
-`AgentMap` · `AppHeader` · `DevTrace` · `HeroVideo` · `Media` · `PeelCorner` · `PersonaAvatar` · `RayBurst` · `Wordmark` · `XrayPanel`
+### Components (11)
+`AgentMap` · `AppHeader` · `DevTrace` · `HeroVideo` · `LiveReasoning` · `Media` · `PeelCorner` · `PersonaAvatar` · `RayBurst` · `Wordmark` · `XrayPanel`
 
 ### Library modules (`web/src/lib`)
-`artStyle` · `careRadar` · `gemini` · `guest` · `hotel` · `personas` · `trace`
+`anim` · `artStyle` · `careRadar` · `gemini` · `guest` · `hotel` · `personas` · `trace`
 
 ### Hotel catalogues (`lib/hotel.ts` exports)
 `HOTEL` · `FACILITIES` · `SPA_PACKAGES` · `FITNESS` · `CLASSES` · `TRANSFERS` · `EVENTS` · `ATTRIBUTES` · `PARTNERS` · `HOUSEKEEPING_SLOTS` · `EVENT_SPACES` · `DDR_PER_PERSON`
@@ -176,4 +176,5 @@ Root directory = `web/`. Set `GEMINI_API_KEY`. Generated media is committed unde
 ### Docs (`docs/`)
 - [`docs/care-radar-floorplan.md`](docs/care-radar-floorplan.md)
 - [`docs/intent-engine-alternatives.md`](docs/intent-engine-alternatives.md)
+- [`docs/wow-recommendations.md`](docs/wow-recommendations.md)
 <!-- AUTO:END -->

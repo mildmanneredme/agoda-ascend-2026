@@ -114,7 +114,7 @@ export default function PeelCorner() {
         className="group relative block h-[68px] w-[68px] cursor-pointer"
       >
         <span
-          className="absolute inset-0 block transition-transform duration-300 ease-out group-hover:scale-110 group-active:scale-105"
+          className="absolute inset-0 block opacity-65 transition-[transform,opacity] duration-300 ease-out group-hover:scale-110 group-hover:opacity-100 group-active:scale-105"
           style={{ transformOrigin: "100% 100%", animation: anim }}
         >
           {/* underside — the machine layer revealed beneath the lifted corner */}
