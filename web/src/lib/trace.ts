@@ -76,6 +76,7 @@ export type ModuleMeta = {
   signature: AgentId; // the agent that defines this module — gets lead emphasis
   architecture: string; // one line: how it really works in the background
   footer: string; // per-module honest framing (replaces the generic footer)
+  previewSteps: TraceStep[]; // canonical orchestration to animate live while the app is thinking
 };
 
 export const MODULES: Record<string, ModuleMeta> = {
@@ -89,6 +90,12 @@ export const MODULES: Record<string, ModuleMeta> = {
       "One Gemini call returns attribute IDs as JSON; the total and RevPAR lift are computed server-side, so the AI never invents a price.",
     footer:
       "The bundle felt curated because the pricing was math, not a guess — composed server-side so the number is always real.",
+    previewSteps: [
+      { agentId: "memory", note: "Reading this guest's signals" },
+      { agentId: "personalization", note: "Matching attributes to the stay" },
+      { agentId: "booking", note: "Assembling the bundle" },
+      { agentId: "revenue", note: "Pricing & RevPAR, server-side" },
+    ],
   },
   "memory-engine": {
     name: "Memory Engine",
@@ -100,6 +107,11 @@ export const MODULES: Record<string, ModuleMeta> = {
       "Behaviour signals go in; Gemini infers preferences with confidence scores — read-only, nothing is booked. The reasoning is shown, not hidden.",
     footer:
       "It feels like the hotel remembers you because the inference is shown in full — every preference traces back to a signal.",
+    previewSteps: [
+      { agentId: "memory", note: "Recalling behaviour signals" },
+      { agentId: "reasoning", note: "Inferring preferences" },
+      { agentId: "personalization", note: "Scoring confidence" },
+    ],
   },
   concierge: {
     name: "AI Concierge",
@@ -111,6 +123,11 @@ export const MODULES: Record<string, ModuleMeta> = {
       "Each message is interpreted live; the visible reply streams while a parallel actions block emits real, bookable moves (eSIM, housekeeping, activities).",
     footer:
       "The reply felt instant because the orchestration didn't — intent, grounding and live actions all resolved in one pass.",
+    previewSteps: [
+      { agentId: "concierge", note: "Interpreting the request" },
+      { agentId: "memory", note: "Grounding in guest context" },
+      { agentId: "activities", note: "Lining up bookable actions" },
+    ],
   },
   journey: {
     name: "Journey Assistant",
@@ -122,6 +139,12 @@ export const MODULES: Record<string, ModuleMeta> = {
       "A flight event triggers it — no guest prompt. It cross-checks the onward plan, then re-sequences room, transfer and rebooking holds before anyone asks.",
     footer:
       "You were re-homed before you noticed the delay because the journey agent watched the flight, not your messages.",
+    previewSteps: [
+      { agentId: "journey", note: "Detecting the flight disruption" },
+      { agentId: "memory", note: "Checking the onward plan" },
+      { agentId: "booking", note: "Re-sequencing room & transfer holds" },
+      { agentId: "concierge", note: "Drafting the heads-up" },
+    ],
   },
   sentiment: {
     name: "Sentiment Lab",
@@ -133,6 +156,11 @@ export const MODULES: Record<string, ModuleMeta> = {
       "One review in; Gemini scores sentiment, decomposes it into prioritised tasks with SLAs, routes them to departments, and drafts a human reply.",
     footer:
       "One review became a dispatched work queue in seconds — the empathy in the reply is real, the routing underneath is relentless.",
+    previewSteps: [
+      { agentId: "sentiment", note: "Scoring sentiment & aspects" },
+      { agentId: "dispatch", note: "Routing prioritised tasks" },
+      { agentId: "concierge", note: "Drafting the guest reply" },
+    ],
   },
   mice: {
     name: "MICE Co-Pilot",
@@ -144,6 +172,11 @@ export const MODULES: Record<string, ModuleMeta> = {
       "An RFP in free text becomes a full proposal in one pass — space match, agenda, and a server-side priced quote (DDR × delegates × days + extras).",
     footer:
       "A 30-second proposal looks effortless because the pricing, space-fit and email were composed in a single coordinated pass.",
+    previewSteps: [
+      { agentId: "events", note: "Matching the brief to a space" },
+      { agentId: "revenue", note: "Pricing DDR × delegates × days" },
+      { agentId: "concierge", note: "Drafting the client email" },
+    ],
   },
   "care-radar": {
     name: "Care Radar",
@@ -155,6 +188,11 @@ export const MODULES: Record<string, ModuleMeta> = {
       "The board's RAG states are seeded; tapping a guest sends their interaction history to one Gemini call that reads the emotion, infers the unspoken need, and composes a staff care brief — gestures and restraint together.",
     footer:
       "It felt like care because the AI was told to perceive, not just parse — and to know when the kindest move is to hold back.",
+    previewSteps: [
+      { agentId: "care", note: "Reading the room" },
+      { agentId: "linguist", note: "Detecting language & register" },
+      { agentId: "memory", note: "Inferring the unspoken need" },
+    ],
   },
 };
 

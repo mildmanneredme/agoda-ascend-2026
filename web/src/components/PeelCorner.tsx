@@ -50,14 +50,32 @@ export default function PeelCorner() {
       } catch {
         /* ignore */
       }
-    }, 5200);
+    }, 6500);
     return () => {
       clearTimeout(start);
       clearTimeout(end);
     };
   }, []);
 
+  // presenter aid: press "x" to toggle the X-ray panel (ignore while typing)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "x" && e.key !== "X") return;
+      const el = document.activeElement as HTMLElement | null;
+      const tag = el?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || el?.isContentEditable) return;
+      setFresh(false);
+      setHint(false);
+      setOpen(!open);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [setOpen, open]);
+
   if (open) return null;
+
+  // a fresh result invites the reveal explicitly; the first-visit hint teaches it
+  const label = fresh ? "See how the AI decided that →" : "Peek under the hood";
 
   const anim = fresh
     ? "peel-lift 1.9s cubic-bezier(0.22,1,0.36,1) both"
@@ -70,17 +88,19 @@ export default function PeelCorner() {
       className="fixed right-0 z-[60] flex flex-col items-end"
       style={{ bottom: "env(safe-area-inset-bottom)" }}
     >
-      {hint && (
+      {(hint || fresh) && (
         <span
-          className="mb-1.5 mr-3 rounded-full border border-hairline px-2.5 py-1 text-[0.64rem] font-semibold text-ink-dim"
+          className="mb-1.5 mr-3 rounded-full border px-2.5 py-1 text-[0.64rem] font-semibold"
           style={{
             animation: "fade-in 0.45s ease both",
             background: "rgba(13,17,44,0.92)",
             backdropFilter: "blur(10px)",
             WebkitBackdropFilter: "blur(10px)",
+            color: fresh ? `color-mix(in srgb, ${accent} 78%, white)` : "var(--ink-dim)",
+            borderColor: fresh ? `color-mix(in srgb, ${accent} 45%, transparent)` : "var(--hairline)",
           }}
         >
-          Peek under the hood
+          {label}
         </span>
       )}
 
