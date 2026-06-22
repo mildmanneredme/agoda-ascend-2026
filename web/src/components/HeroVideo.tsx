@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState, useSyncExternalStore } from "react";
-import { heroMaster, heroPoster, useArtStyle } from "@/lib/artStyle";
+import { heroMaster, heroPoster } from "@/lib/artStyle";
 
 const RM_QUERY = "(prefers-reduced-motion: reduce)";
 function subscribeRM(cb: () => void) {
@@ -37,19 +37,18 @@ function usePortrait() {
  * Ambient property loop behind the landing experience: a single edited master
  * clip (the full arrival sequence), looped. Picks the portrait or landscape
  * master by viewport. Falls back to the poster still under prefers-reduced-motion
- * or if the master is missing (e.g. a style not yet produced). A heavy scrim
+ * or if the master is missing. A heavy scrim
  * keeps overlaid text legible.
  */
 export default function HeroVideo() {
-  const [style] = useArtStyle();
   const reduced = usePrefersReducedMotion();
   const portrait = usePortrait();
 
   const orient = portrait ? "port" : "land";
-  const src = heroMaster(style, orient);
-  const poster = heroPoster(style);
+  const src = heroMaster(orient);
+  const poster = heroPoster();
 
-  // Reset the fallback flag whenever the source changes (style/orientation switch).
+  // Reset the fallback flag whenever the source changes (orientation switch).
   const [prevSrc, setPrevSrc] = useState(src);
   const [videoOk, setVideoOk] = useState(true);
   if (prevSrc !== src) {

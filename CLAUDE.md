@@ -68,7 +68,7 @@ or Next 16 blocks the client JS and nothing is interactive.
 1. **Landing** (`/`) — hero video backdrop (no chrome graphics); single CTA **"Welcome to the Neural"** → the chooser. A `?choose=1` query opens the chooser directly.
 2. **Profile chooser** (the `gallery` stage on `/`) — six persona cards (Elena first) with portraits, or "be yourself". Picking shows **"Loading {name}'s profile…"** (persona) or **"Creating {name} profile…"** (custom), then routes to the hub. The chosen profile is saved to `localStorage` and drives every app.
 3. **Hub** (`/hub`) — top-left **agoda·ascend logo → home**; top-right **profile avatar → chooser** (`/?choose=1`). An "Explore the property" tile + the seven apps grouped by three pillars.
-4. **Explore the Property** (`/property`) — a guided tour of the hotel with a live **art-direction toggle** (luxe ⇄ neon).
+4. **Explore the Property** (`/property`) — a guided tour of the hotel (Riverside Luxe art direction).
 5. **Micro-apps** (`/apps/*`) — each uses `AppHeader` (back to hub, title, pillar badge, **active-profile avatar** linking to the chooser).
 
 ### Navigation rules
@@ -98,22 +98,21 @@ Each app records a **DevTrace** (prompt, response, agent map, latency) surfaced 
 - **`personas.ts`** — six preset travelers (Elena is the protagonist) + `STAYS` (each guest's
   planned trip: Bangkok, distinct dates/guests/occasion — drives the Offer Builder intake).
 - **`guest.ts`** — `GuestProfile` type + `localStorage` persistence + travel styles.
-- **`artStyle.ts`** — the `useArtStyle()` store (luxe ⇄ neon) + asset-path helpers.
+- **`artStyle.ts`** — luxe-only asset-path helpers (`imgSrc`/`heroPoster`/`heroMaster`).
 - **`gemini.ts`** — server client (model `gemini-2.5-flash`, `FAST` = no extended thinking).
 - **`trace.ts`** — DevTrace types + the logical-agent registry.
 
 ## Visuals & media
 
-- **Art directions:** `luxe` (cinematic golden-hour riverside) and `neon` (white minimalist
-  Scandinavian **spaceport**, white+blue neon). The property showcase + landing hero video swap
-  together via `useArtStyle()`.
+- **Art direction:** `luxe` (cinematic golden-hour riverside) — the single, app-wide look for the
+  property showcase + landing hero video.
 - **Pre-rendered static assets** under `web/public/` (Replicate is never called at runtime):
-  - `property/{luxe|neon}/<slug>.webp` — showcase imagery (both variants)
-  - `hero/landing-{luxe|neon}.mp4` + `…-poster.webp` — landing ambient loop (plays at 0.8×)
+  - `property/luxe/<slug>.webp` — showcase imagery
+  - `hero/landing-luxe.mp4` + `…-poster.webp` — landing ambient loop (plays at 0.8×)
   - `personas/<id>.webp` — persona portraits (emoji-glyph fallback)
   - `mobile-background.png` — app-wide backdrop (fixed, behind everything except the landing video)
   - `icon.png` / `apple-icon.png` / `icon-{192,512}.png` — brain favicon
-- Regenerate with `scripts/generate-media.mjs` (flags: `--all`, `--subjects=`, `--styles=luxe,neon`,
+- Regenerate with `scripts/generate-media.mjs` (flags: `--all`, `--subjects=`, `--styles=luxe`,
   `--poster`, `--video`, `--personas`, `--favicons`, `--force`). `replicate-mcp` is registered in
   `.mcp.json` for interactive use (needs `REPLICATE_API_TOKEN`).
 
@@ -171,10 +170,11 @@ Root directory = `web/`. Set `GEMINI_API_KEY`. Generated media is committed unde
 `HOTEL` · `FACILITIES` · `SPA_PACKAGES` · `FITNESS` · `CLASSES` · `TRANSFERS` · `EVENTS` · `ATTRIBUTES` · `PARTNERS` · `HOUSEKEEPING_SLOTS` · `EVENT_SPACES` · `DDR_PER_PERSON`
 
 ### Generated media (`web/public`)
-- property/luxe: **25** · property/neon: **19** · personas: **6** · hero: **8**
+- property/luxe: **25** · property/neon: **0** · personas: **6** · hero: **6**
 
 ### Docs (`docs/`)
 - [`docs/care-radar-floorplan.md`](docs/care-radar-floorplan.md)
 - [`docs/intent-engine-alternatives.md`](docs/intent-engine-alternatives.md)
+- [`docs/keynote-outline.md`](docs/keynote-outline.md)
 - [`docs/wow-recommendations.md`](docs/wow-recommendations.md)
 <!-- AUTO:END -->

@@ -2,55 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import Media from "@/components/Media";
-import { ART_STYLES, useArtStyle, type ArtStyle } from "@/lib/artStyle";
-
-const STYLE_CAPTION =
-  "Same hotel, two souls — cinematic golden-hour vs. white-neon spaceport. Tap to transform.";
-
-/**
- * Crossfading property image. Both art-direction variants are kept mounted and
- * stacked; toggling the style fades the active layer in and the other out via
- * the shared `.xfade` utility, so the swap reads as a cinematic transformation
- * of the same space rather than an instant pop. `prefers-reduced-motion`
- * collapses the transition to an instant swap (handled globally in CSS).
- * Parent must be `relative`.
- */
-function CrossfadeMedia({
-  slug,
-  style,
-  alt,
-  sizes,
-  priority = false,
-}: {
-  slug: string;
-  style: ArtStyle;
-  alt: string;
-  sizes?: string;
-  priority?: boolean;
-}) {
-  return (
-    <>
-      {ART_STYLES.map((s) => {
-        const active = s.id === style;
-        return (
-          <div
-            key={s.id}
-            aria-hidden={!active}
-            className={`xfade absolute inset-0 ${active ? "opacity-100" : "opacity-0"}`}
-          >
-            <Media
-              slug={slug}
-              style={s.id}
-              alt={active ? alt : ""}
-              sizes={sizes}
-              priority={priority}
-            />
-          </div>
-        );
-      })}
-    </>
-  );
-}
 import {
   HOTEL,
   FACILITIES,
@@ -169,34 +120,27 @@ const SECTIONS: Section[] = [
 
 export default function Property() {
   const router = useRouter();
-  const [style, setStyle] = useArtStyle();
 
   return (
     <main className="relative min-h-dvh overflow-hidden pb-16">
 
-      {/* sticky header: back + art-style toggle + caption */}
-      <header className="pt-safe sticky top-0 z-40 flex flex-col gap-2 px-5 pb-3 backdrop-blur-xl">
-        <div className="flex items-center justify-between gap-3">
-          <button
-            onClick={() => router.back()}
-            aria-label="Back"
-            className="press glass flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink-dim"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-          <StyleToggle style={style} setStyle={setStyle} />
-        </div>
-        <p className="self-end text-right text-[0.66rem] leading-snug text-ink-dim sm:max-w-[34ch]">
-          {STYLE_CAPTION}
-        </p>
+      {/* sticky header: back */}
+      <header className="pt-safe sticky top-0 z-40 flex items-center px-5 pb-3 backdrop-blur-xl">
+        <button
+          onClick={() => router.back()}
+          aria-label="Back"
+          className="press glass flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink-dim"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
       </header>
 
       {/* hero band */}
       <section className="relative z-10 px-5">
         <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl sm:aspect-[16/10]">
-          <CrossfadeMedia slug={HOTEL.heroImage} style={style} alt={HOTEL.name} priority sizes="(max-width: 768px) 100vw, 768px" />
+          <Media slug={HOTEL.heroImage} alt={HOTEL.name} priority sizes="(max-width: 768px) 100vw, 768px" />
           <div className="absolute inset-0 bg-gradient-to-t from-abyss via-abyss/30 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 p-6">
             <p className="mb-2 text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-ray-aqua">
@@ -220,7 +164,7 @@ export default function Property() {
 
             <div className="stagger flex flex-col gap-3">
               {s.leads.map((lead) => (
-                <LeadCard key={lead.title} lead={lead} style={style} color={s.color} />
+                <LeadCard key={lead.title} lead={lead} color={s.color} />
               ))}
             </div>
 
@@ -266,11 +210,11 @@ export default function Property() {
   );
 }
 
-function LeadCard({ lead, style, color }: { lead: Lead; style: ArtStyle; color: string }) {
+function LeadCard({ lead, color }: { lead: Lead; color: string }) {
   return (
     <div className="press glass-deep overflow-hidden rounded-3xl" style={{ boxShadow: `inset 2px 0 0 ${color}` }}>
       <div className="relative aspect-[16/10] w-full overflow-hidden">
-        <CrossfadeMedia slug={lead.image} style={style} alt={lead.title} sizes="(max-width: 768px) 100vw, 768px" />
+        <Media slug={lead.image} alt={lead.title} sizes="(max-width: 768px) 100vw, 768px" />
         <div className="absolute inset-0 bg-gradient-to-t from-abyss/85 via-abyss/10 to-transparent" />
         <span
           className="absolute left-4 top-4 rounded-full border px-2.5 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.12em] backdrop-blur-md"
@@ -282,42 +226,6 @@ function LeadCard({ lead, style, color }: { lead: Lead; style: ArtStyle; color: 
       <div className="p-4">
         <h3 className="display text-lg font-semibold text-ink">{lead.title}</h3>
         <p className="mt-1 text-[0.84rem] leading-snug text-ink-dim">{lead.blurb}</p>
-      </div>
-    </div>
-  );
-}
-
-function StyleToggle({ style, setStyle }: { style: ArtStyle; setStyle: (s: ArtStyle) => void }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span
-        aria-hidden
-        className="hidden text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-ink-faint sm:inline"
-      >
-        Art direction
-      </span>
-      <div
-        role="group"
-        aria-label="Art direction"
-        className="glass relative flex items-center gap-1 rounded-full p-1 ring-1 ring-[var(--hairline)]"
-        style={{ boxShadow: "0 0 22px -10px var(--ray-aqua)" }}
-      >
-        {ART_STYLES.map((s) => {
-          const active = s.id === style;
-          return (
-            <button
-              key={s.id}
-              onClick={() => setStyle(s.id)}
-              aria-pressed={active}
-              className={`press rounded-full px-3 py-1.5 text-[0.7rem] font-semibold transition-colors ${
-                active ? "bg-ink text-abyss" : "text-ink-dim hover:text-ink"
-              }`}
-              title={s.hint}
-            >
-              {active ? <span className="prism-text">{s.label}</span> : s.label}
-            </button>
-          );
-        })}
       </div>
     </div>
   );

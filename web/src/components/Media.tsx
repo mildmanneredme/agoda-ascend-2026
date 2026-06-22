@@ -2,22 +2,20 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { imgSrc, type ArtStyle } from "@/lib/artStyle";
+import { imgSrc } from "@/lib/artStyle";
 
 /**
  * Property image with a graceful gradient fallback — renders the generated
- * /property/{style}/{slug}.webp asset, and quietly degrades to a brand
+ * /property/luxe/{slug}.webp asset, and quietly degrades to a brand
  * gradient if that asset hasn't been generated yet. Parent must be `relative`.
  */
 export default function Media({
   slug,
-  style,
   alt,
   sizes = "(max-width: 768px) 100vw, 768px",
   priority = false,
 }: {
   slug: string;
-  style: ArtStyle;
   alt: string;
   sizes?: string;
   priority?: boolean;
@@ -32,8 +30,8 @@ export default function Media({
       />
       {!failed && (
         <Image
-          key={imgSrc(style, slug)}
-          src={imgSrc(style, slug)}
+          key={imgSrc(slug)}
+          src={imgSrc(slug)}
           alt={alt}
           fill
           sizes={sizes}

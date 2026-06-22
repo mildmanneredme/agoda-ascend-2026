@@ -30,8 +30,8 @@ export const HOTEL = {
 
 /**
  * Showcase catalogues below power the "Explore the Property" tour and feed the AI
- * brief. Every `image` is a slug resolved to `/property/{style}/{slug}.webp`
- * (style ∈ "luxe" | "neon") — see lib/artStyle.ts.
+ * brief. Every `image` is a slug resolved to `/property/luxe/{slug}.webp`
+ * — see lib/artStyle.ts.
  */
 
 export type Facility = {

@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "@/components/AppHeader";
 import Media from "@/components/Media";
-import { useArtStyle } from "@/lib/artStyle";
 import { HOTEL } from "@/lib/hotel";
 import { loadGuest, styleOf, type GuestProfile } from "@/lib/guest";
 import { personaOf, stayOf } from "@/lib/personas";
@@ -60,7 +59,6 @@ function usePriceTicker(target: number, start: number, run: boolean) {
 export default function OfferBuilder() {
   const router = useRouter();
   const { record } = useDevTrace();
-  const [style] = useArtStyle();
   const [guest, setGuest] = useState<GuestProfile | null>(null);
   const [phase, setPhase] = useState<Phase>("intake");
   const [trip, setTrip] = useState<{ city: string; checkIn: string; checkOut: string; guests: number } | null>(null);
@@ -285,7 +283,7 @@ export default function OfferBuilder() {
                 AI-matched · #1 for you
               </span>
               <div className="relative aspect-[16/9] w-full overflow-hidden">
-                <Media slug={HOTEL.heroImage} style={style} alt={HOTEL.name} sizes="(max-width: 768px) 100vw, 768px" />
+                <Media slug={HOTEL.heroImage} alt={HOTEL.name} sizes="(max-width: 768px) 100vw, 768px" />
                 <div className="absolute inset-0 bg-gradient-to-t from-abyss/70 to-transparent" />
               </div>
               <div className="p-4">

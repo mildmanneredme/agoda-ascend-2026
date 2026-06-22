@@ -37,7 +37,7 @@ Requires `.env.local` with `GEMINI_API_KEY`. Media generation also needs
   `hotelBrief()` flattens it all into the prompt context every app feeds Gemini — **add new
   amenities here and they automatically become things the AI can talk about.**
 - `src/lib/guest.ts` / `personas.ts` — guest profile + the six preset travelers
-- `src/lib/artStyle.ts` — the `useArtStyle()` store (luxe ⇄ neon), asset path helpers
+- `src/lib/artStyle.ts` — luxe-only asset-path helpers (`imgSrc`/`heroPoster`/`heroMaster`)
 - `src/lib/trace.ts` — X-ray trace types + the logical-agent registry
 
 ## Conventions
@@ -50,12 +50,12 @@ Requires `.env.local` with `GEMINI_API_KEY`. Media generation also needs
 ## Visuals & media
 - Imagery is **pre-rendered static assets** under `public/` — Replicate is never called at
   runtime (keeps the PWA fast and Vercel-friendly):
-  - `public/property/{luxe|neon}/<slug>.webp` — two art-direction variants, switched live by `useArtStyle()`
-  - `public/hero/landing-{luxe|neon}.mp4` + `…-poster.webp` — landing ambient loop
+  - `public/property/luxe/<slug>.webp` — Riverside Luxe showcase imagery
+  - `public/hero/landing-luxe.mp4` + `…-poster.webp` — landing ambient loop
   - `public/personas/<id>.webp` — persona portraits (emoji-glyph fallback)
 - Regenerate via `node scripts/generate-media.mjs` (repo root). Models: `openai/gpt-image-2`
   (quality `medium`) for stills, `bytedance/seedance-1.5-pro` (9:16) for the hero loop.
-  Flags: `--all`, `--subjects=…`, `--styles=luxe,neon`, `--poster`, `--video`, `--personas`, `--force`.
+  Flags: `--all`, `--subjects=…`, `--styles=luxe`, `--poster`, `--video`, `--personas`, `--force`.
 - The `replicate-mcp` server is registered in the repo-root `.mcp.json` for interactive use
   (needs `REPLICATE_API_TOKEN` in the environment).
 

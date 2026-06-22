@@ -30,6 +30,7 @@ function OnboardingInner() {
   const { record } = useDevTrace();
   // The hub's profile button deep-links here with ?choose to open the chooser directly.
   const [stage, setStage] = useState<Stage>(searchParams.get("choose") !== null ? "gallery" : "welcome");
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [name, setName] = useState("");
   const [styleId, setStyleId] = useState<string | null>(null);
   const [syncName, setSyncName] = useState("");
@@ -140,7 +141,7 @@ function OnboardingInner() {
               experience the journey.
             </p>
             <button
-              onClick={() => setStage("gallery")}
+              onClick={() => setShowDisclaimer(true)}
               className="press w-full rounded-2xl bg-ink py-4 font-display text-base font-semibold text-abyss shadow-[0_0_40px_rgba(75,234,234,0.25)]"
             >
               Welcome to the Neural
@@ -282,6 +283,60 @@ function OnboardingInner() {
           </div>
         )}
       </div>
+
+      {showDisclaimer && (
+        <div className="pb-safe pt-safe fixed inset-0 z-[80] flex items-center justify-center px-6">
+          <button
+            aria-label="Dismiss"
+            onClick={() => setShowDisclaimer(false)}
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="disclaimer-title"
+            className="glass-deep rise relative z-10 w-full max-w-md rounded-3xl p-6"
+          >
+            <button
+              onClick={() => setShowDisclaimer(false)}
+              aria-label="Close"
+              className="press absolute right-4 top-4 text-ink-faint hover:text-ink"
+            >
+              <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            </button>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.28em] text-ray-aqua">
+              Demonstration only
+            </p>
+            <h2 id="disclaimer-title" className="display mb-4 text-2xl font-bold leading-tight">
+              Before you step in
+            </h2>
+            <p className="mb-6 text-sm leading-relaxed text-ink-dim">
+              This is a demonstration sandbox. It is <span className="font-semibold text-ink">not a real
+              application</span> and <span className="font-semibold text-ink">The Grand Neural is not a real
+              hotel</span>. No information shown is real customer data — every guest, booking and AI response
+              is fictional and for demonstration purposes only. Agoda accepts no liability for any information
+              presented within this experience.
+            </p>
+            <button
+              onClick={() => {
+                setShowDisclaimer(false);
+                setStage("gallery");
+              }}
+              className="press w-full rounded-2xl bg-ink py-4 font-display text-base font-semibold text-abyss shadow-[0_0_40px_rgba(75,234,234,0.25)]"
+            >
+              Proceed
+            </button>
+            <button
+              onClick={() => setShowDisclaimer(false)}
+              className="press mt-1 w-full py-3 text-center text-sm font-semibold text-ink-dim"
+            >
+              Back
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
