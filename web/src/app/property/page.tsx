@@ -138,7 +138,7 @@ export default function Property() {
       </header>
 
       {/* hero band */}
-      <section className="relative z-10 px-5">
+      <section className="frame relative z-10 px-5">
         <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl sm:aspect-[16/10]">
           <Media slug={HOTEL.heroImage} alt={HOTEL.name} priority sizes="(max-width: 768px) 100vw, 768px" />
           <div className="absolute inset-0 bg-gradient-to-t from-abyss via-abyss/30 to-transparent" />
@@ -152,7 +152,7 @@ export default function Property() {
         </div>
       </section>
 
-      <div className="relative z-10 mt-10 flex flex-col gap-12 px-5">
+      <div className="frame relative z-10 mt-10 flex flex-col gap-12 px-5">
         {SECTIONS.map((s) => (
           <section key={s.key}>
             <div className="mb-4">

@@ -103,7 +103,7 @@ export default function MemoryEngine() {
     <main className="relative min-h-dvh overflow-hidden">
       <AppHeader title="Guest Memory" pillar="know-me" perspective="hotel" />
 
-      <div className="relative z-10 px-5 pb-safe">
+      <div className="frame relative z-10 px-5 pb-safe">
         {loading && (
           <div className="flex flex-col items-center pt-[14vh] text-center">
             <p className="rise display mb-2 text-lg font-medium text-ink">

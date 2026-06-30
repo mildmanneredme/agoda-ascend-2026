@@ -145,10 +145,12 @@ export default function CareRadar() {
   }
 
   return (
-    <main className="relative flex min-h-dvh flex-col overflow-hidden">
+    <main className="relative flex min-h-dvh flex-col overflow-hidden panes:h-dvh">
       <AppHeader title="EQ Radar" pillar="human-edge" perspective="hotel" />
 
-      <div className="relative z-10 flex flex-1 flex-col px-5 pb-6">
+      <div className="relative z-10 mx-auto flex w-full flex-1 flex-col px-5 pb-6 tablet:max-w-[40rem] panes:max-w-none panes:flex-row panes:gap-5">
+        {/* board column */}
+        <div className="flex min-h-0 flex-1 flex-col">
         <p className="rise mb-1 text-xs font-semibold uppercase tracking-[0.24em] text-ray-magenta">
           Every guest, in-house
         </p>
@@ -177,18 +179,27 @@ export default function CareRadar() {
             </p>
           )}
         </div>
-      </div>
+        </div>{/* /board column */}
 
-      {selected && (
-        <Profile
-          guest={selected}
-          read={read}
-          busy={busy}
-          error={error}
-          onClose={close}
-          onRetry={() => select(selected.id)}
-        />
-      )}
+        {/* Selected guest: a full-screen overlay on phones/portrait, a persistent
+            right-hand pane on landscape iPad (no modal). */}
+        {selected ? (
+          <Profile
+            guest={selected}
+            read={read}
+            busy={busy}
+            error={error}
+            onClose={close}
+            onRetry={() => select(selected.id)}
+          />
+        ) : (
+          <div className="hidden panes:flex panes:w-[26rem] panes:shrink-0 panes:items-center panes:justify-center panes:rounded-3xl panes:border panes:border-dashed panes:border-hairline">
+            <p className="px-10 text-center text-sm leading-relaxed text-ink-dim">
+              Tap a room to read how that guest really feels.
+            </p>
+          </div>
+        )}
+      </div>
     </main>
   );
 }
@@ -366,7 +377,7 @@ function Profile({
   const lang = read?.language?.trim();
   const speaksOther = !!lang && lang.toLowerCase() !== "english";
   return (
-    <div className="bloom fixed inset-0 z-50 overflow-y-auto bg-abyss/92 backdrop-blur-xl">
+    <div className="bloom fixed inset-0 z-50 overflow-y-auto bg-abyss/92 backdrop-blur-xl panes:relative panes:inset-auto panes:z-auto panes:w-[26rem] panes:shrink-0 panes:rounded-3xl panes:border panes:border-hairline panes:bg-abyss/40 panes:backdrop-blur-md">
       <div className="pt-safe sticky top-0 z-10 flex items-center gap-3 px-5 pb-3 pt-3 backdrop-blur-xl">
         <button
           onClick={onClose}

@@ -143,7 +143,7 @@ export default function Hub() {
   return (
     <main className="relative min-h-dvh overflow-hidden pb-12">
 
-      <div className="pt-safe relative z-10 px-6 pt-4">
+      <div className="frame pt-safe relative z-10 px-6 pt-4">
         <div className="mb-8 flex items-start justify-between">
           <div className="flex flex-col items-start gap-2">
             <Link href="/" aria-label="Back to home" className="press">

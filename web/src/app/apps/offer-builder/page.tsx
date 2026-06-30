@@ -168,7 +168,7 @@ export default function OfferBuilder() {
     <main className="relative min-h-dvh overflow-hidden">
       <AppHeader title="Offer Builder" pillar="know-me" perspective="guest" />
 
-      <div className="relative z-10 px-5 pb-safe">
+      <div className="frame relative z-10 px-5 pb-safe">
         {/* ---------- INTAKE: chat with the booking agent ---------- */}
         {phase === "intake" && (
           <div className="pt-2">

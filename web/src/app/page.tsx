@@ -125,7 +125,7 @@ function OnboardingInner() {
         </Link>
       </div>
 
-      <div key={stage} className="phase-in pb-safe relative z-10 flex flex-1 flex-col justify-end px-6">
+      <div key={stage} className="frame phase-in pb-safe relative z-10 flex flex-1 flex-col justify-end px-6">
         {stage === "welcome" && (
           <div className="stagger mb-6">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-ray-aqua">
@@ -160,7 +160,7 @@ function OnboardingInner() {
             <p className="rise mb-5 text-sm text-ink-dim">
               Each traveler arrives with their own history. Pick one to step into their stay.
             </p>
-            <div className="stagger -mx-1 flex flex-col gap-2.5 overflow-y-auto px-1 pb-2">
+            <div className="stagger -mx-1 flex flex-col gap-2.5 overflow-y-auto px-1 pb-2 tablet:grid tablet:grid-cols-2">
               {PERSONAS.map((p) => {
                 const c = styleForPersona(p).color;
                 return (

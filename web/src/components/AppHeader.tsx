@@ -77,7 +77,7 @@ export default function AppHeader({
 
   return (
     <header className="pt-safe sticky top-0 z-40 px-5 pb-3 backdrop-blur-xl">
-      <div className="flex items-center justify-between gap-2">
+      <div className="frame flex items-center justify-between gap-2">
         <Link
           href="/hub"
           className="press glass flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink-dim"
@@ -109,7 +109,7 @@ export default function AppHeader({
           </Link>
         )}
       </div>
-      <div className="mt-2 flex items-center justify-between gap-2">
+      <div className="frame mt-2 flex items-center justify-between gap-2">
         <PerspectiveBadge perspective={perspective} />
         <ConfidentialTag />
       </div>
