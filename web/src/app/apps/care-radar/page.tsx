@@ -65,9 +65,26 @@ function useCanRender3D() {
   return useSyncExternalStore(noop, canRender3D, () => false);
 }
 
+// True only on landscape iPad-class widths — where the selected guest renders as an
+// inline right-hand pane. Elsewhere (phones, portrait) the guest is a full-screen modal.
+// Mirrors the `panes` CSS variant so JS placement and CSS styling stay in lock-step.
+const PANES_QUERY = "(min-width: 1024px) and (orientation: landscape)";
+function usePanes() {
+  return useSyncExternalStore(
+    (cb) => {
+      const mq = window.matchMedia(PANES_QUERY);
+      mq.addEventListener("change", cb);
+      return () => mq.removeEventListener("change", cb);
+    },
+    () => window.matchMedia(PANES_QUERY).matches,
+    () => false,
+  );
+}
+
 export default function CareRadar() {
   const { record } = useDevTrace();
   const can3d = useCanRender3D();
+  const panes = usePanes();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [read, setRead] = useState<Read | null>(null);
   const [busy, setBusy] = useState(false);
@@ -148,7 +165,7 @@ export default function CareRadar() {
     <main className="relative flex min-h-dvh flex-col overflow-hidden panes:h-dvh">
       <AppHeader title="EQ Radar" pillar="human-edge" perspective="hotel" />
 
-      <div className="relative z-10 mx-auto flex w-full flex-1 flex-col px-5 pb-6 tablet:max-w-[40rem] panes:max-w-none panes:flex-row panes:gap-5">
+      <div className="relative z-10 mx-auto flex w-full flex-1 flex-col px-5 pb-6 tablet:max-w-[40rem] panes:min-h-0 panes:max-w-none panes:flex-row panes:gap-5">
         {/* board column */}
         <div className="flex min-h-0 flex-1 flex-col">
         <p className="rise mb-1 text-xs font-semibold uppercase tracking-[0.24em] text-ray-magenta">
@@ -181,25 +198,39 @@ export default function CareRadar() {
         </div>
         </div>{/* /board column */}
 
-        {/* Selected guest: a full-screen overlay on phones/portrait, a persistent
-            right-hand pane on landscape iPad (no modal). */}
-        {selected ? (
-          <Profile
-            guest={selected}
-            read={read}
-            busy={busy}
-            error={error}
-            onClose={close}
-            onRetry={() => select(selected.id)}
-          />
-        ) : (
-          <div className="hidden panes:flex panes:w-[26rem] panes:shrink-0 panes:items-center panes:justify-center panes:rounded-3xl panes:border panes:border-dashed panes:border-hairline">
-            <p className="px-10 text-center text-sm leading-relaxed text-ink-dim">
-              Tap a room to read how that guest really feels.
-            </p>
-          </div>
-        )}
+        {/* Landscape iPad: the selected guest lives in a persistent right-hand pane
+            (an empty-state prompt when nothing is selected). */}
+        {panes &&
+          (selected ? (
+            <Profile
+              guest={selected}
+              read={read}
+              busy={busy}
+              error={error}
+              onClose={close}
+              onRetry={() => select(selected.id)}
+            />
+          ) : (
+            <div className="flex w-[26rem] shrink-0 items-center justify-center rounded-3xl border border-dashed border-hairline">
+              <p className="px-10 text-center text-sm leading-relaxed text-ink-dim">
+                Tap a room to read how that guest really feels.
+              </p>
+            </div>
+          ))}
       </div>
+
+      {/* Phones / portrait: full-screen modal overlay. Rendered OUTSIDE the z-10 row
+          so its z-50 stacks above the sticky AppHeader (z-40). */}
+      {!panes && selected && (
+        <Profile
+          guest={selected}
+          read={read}
+          busy={busy}
+          error={error}
+          onClose={close}
+          onRetry={() => select(selected.id)}
+        />
+      )}
     </main>
   );
 }
