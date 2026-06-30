@@ -17,12 +17,12 @@ plus the media pipeline, docs and tooling.
 
 A mobile-first PWA demo for **Agoda Ascend 2026** (Part 2). A guest scans a QR code, picks a
 **profile** (or creates one), and explores AI hotel-tech demos set in a fictional property,
-**The Grand Neural** (riverside Bangkok). Every AI feature runs on **Gemini 2.5-flash**, server-side.
+**The Grand Neural** (riverside Bangkok). Every AI feature runs on **Gemini 3 Flash**, server-side.
 
 ## Stack
 
 - **Next.js 16.2.9** App Router · **React 19** · **TypeScript** · **Tailwind CSS v4** · **Motion 12**
-- **Gemini 2.5-flash** (`@google/genai`) — key stays server-side in route handlers
+- **Gemini 3 Flash** (`@google/genai`, `gemini-3-flash-preview`) — key stays server-side in route handlers
 - **Replicate** (`openai/gpt-image-2`, `bytedance/seedance-1.5-pro`) for **pre-rendered** media (build-time only, never at runtime)
 - Path alias `@/*` → `web/src/*`
 
@@ -99,7 +99,7 @@ Each app records a **DevTrace** (prompt, response, agent map, latency) surfaced 
   planned trip: Bangkok, distinct dates/guests/occasion — drives the Offer Builder intake).
 - **`guest.ts`** — `GuestProfile` type + `localStorage` persistence + travel styles.
 - **`artStyle.ts`** — luxe-only asset-path helpers (`imgSrc`/`heroPoster`/`heroMaster`).
-- **`gemini.ts`** — server client (model `gemini-2.5-flash`, `FAST` = no extended thinking).
+- **`gemini.ts`** — server client (model `gemini-3-flash-preview`, `FAST` = no extended thinking).
 - **`trace.ts`** — DevTrace types + the logical-agent registry.
 
 ## Visuals & media
@@ -164,7 +164,7 @@ Root directory = `web/`. Set `GEMINI_API_KEY`. Generated media is committed unde
 `AgentMap` · `AppHeader` · `DevTrace` · `HeroVideo` · `LiveReasoning` · `Media` · `PeelCorner` · `PersonaAvatar` · `RayBurst` · `Wordmark` · `XrayPanel`
 
 ### Library modules (`web/src/lib`)
-`anim` · `artStyle` · `careRadar` · `gemini` · `guest` · `hotel` · `personas` · `trace`
+`anim` · `artStyle` · `careRadar` · `gemini` · `guest` · `hotel` · `personas` · `rateLimit` · `trace`
 
 ### Hotel catalogues (`lib/hotel.ts` exports)
 `HOTEL` · `FACILITIES` · `SPA_PACKAGES` · `FITNESS` · `CLASSES` · `TRANSFERS` · `EVENTS` · `ATTRIBUTES` · `PARTNERS` · `HOUSEKEEPING_SLOTS` · `EVENT_SPACES` · `DDR_PER_PERSON`

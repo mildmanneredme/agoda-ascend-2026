@@ -336,7 +336,7 @@ export default function Concierge() {
 
   return (
     <main className="flex h-dvh flex-col">
-      <AppHeader title="AI Concierge" pillar="already-handled" />
+      <AppHeader title="AI Concierge" pillar="already-handled" perspective="guest" />
 
       {toast && (
         <button

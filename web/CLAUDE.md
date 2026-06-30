@@ -12,7 +12,7 @@ all set in a fictional property, **The Grand Neural** (riverside Bangkok).
 
 ## Stack
 - **Next.js 16.2.9** App Router · **React 19** · **TypeScript** · **Tailwind CSS v4** · **Motion 12**
-- **Gemini 2.5-flash** (`@google/genai`) for all AI features — key stays server-side
+- **Gemini 3 Flash** (`@google/genai`, model `gemini-3-flash-preview`) for all AI features — key stays server-side
 - Path alias: `@/*` → `src/*`
 
 ## Commands

@@ -1,5 +1,6 @@
 import { Type } from "@google/genai";
 import { gemini, MODEL, FAST } from "@/lib/gemini";
+import { rateLimit } from "@/lib/rateLimit";
 import { HOTEL } from "@/lib/hotel";
 
 export const maxDuration = 30;
@@ -36,6 +37,9 @@ const schema = {
 };
 
 export async function POST(req: Request) {
+  const limited = rateLimit(req);
+  if (limited) return limited;
+
   const { guestName, brief, flight, delayMinutes, scenario } = await req.json();
 
   const isCancel = scenario === "cancel";

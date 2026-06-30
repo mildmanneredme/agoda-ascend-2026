@@ -146,7 +146,7 @@ export default function CareRadar() {
 
   return (
     <main className="relative flex min-h-dvh flex-col overflow-hidden">
-      <AppHeader title="EQ Radar" pillar="human-edge" />
+      <AppHeader title="EQ Radar" pillar="human-edge" perspective="hotel" />
 
       <div className="relative z-10 flex flex-1 flex-col px-5 pb-6">
         <p className="rise mb-1 text-xs font-semibold uppercase tracking-[0.24em] text-ray-magenta">

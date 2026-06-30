@@ -1,5 +1,6 @@
 import { Type } from "@google/genai";
 import { gemini, MODEL, FAST } from "@/lib/gemini";
+import { rateLimit } from "@/lib/rateLimit";
 import { DDR_PER_PERSON, EVENT_SPACES, HOTEL, miceBrief } from "@/lib/hotel";
 
 export const maxDuration = 30;
@@ -75,6 +76,9 @@ const proposeSchema = {
 };
 
 export async function POST(req: Request) {
+  const limited = rateLimit(req);
+  if (limited) return limited;
+
   const { rfp, answers, stage } = await req.json();
 
   // ---- Stage 1: ask 1-2 smart clarifying questions ----

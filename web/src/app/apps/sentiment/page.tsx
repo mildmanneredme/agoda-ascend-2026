@@ -151,7 +151,7 @@ export default function SentimentLab() {
 
   return (
     <main className="relative min-h-dvh overflow-hidden">
-      <AppHeader title="Sentiment Lab" pillar="human-edge" />
+      <AppHeader title="Sentiment Lab" pillar="human-edge" perspective="hotel" />
 
       {/* celebratory toast — positive reviews only, auto-fades */}
       {toast && (

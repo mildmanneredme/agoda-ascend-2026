@@ -1,4 +1,5 @@
 import { gemini, MODEL, FAST } from "@/lib/gemini";
+import { rateLimit } from "@/lib/rateLimit";
 import { HOTEL, hotelBrief } from "@/lib/hotel";
 
 export const maxDuration = 60;
@@ -19,6 +20,9 @@ Action types you may emit:
 The visible part of your reply should confirm naturally what was done. Emit at most one action per reply.`;
 
 export async function POST(req: Request) {
+  const limited = rateLimit(req);
+  if (limited) return limited;
+
   const { guestName, travelStyle, brief, messages } = (await req.json()) as {
     guestName: string;
     travelStyle: string;
