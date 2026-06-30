@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AscendLogo } from "@/components/Wordmark";
-import { PILLARS, type PillarKey } from "@/components/AppHeader";
+import { PILLARS, ConfidentialTag, type PillarKey } from "@/components/AppHeader";
 import PersonaAvatar from "@/components/PersonaAvatar";
 import { loadGuest, styleOf, type GuestProfile } from "@/lib/guest";
 import { personaOf, stayOf } from "@/lib/personas";
@@ -143,11 +143,14 @@ export default function Hub() {
   return (
     <main className="relative min-h-dvh overflow-hidden pb-12">
 
-      <div className="pt-safe relative z-10 px-6 pt-4">
+      <div className="frame pt-safe relative z-10 px-6 pt-4">
         <div className="mb-8 flex items-start justify-between">
-          <Link href="/" aria-label="Back to home" className="press">
-            <AscendLogo height={28} />
-          </Link>
+          <div className="flex flex-col items-start gap-2">
+            <Link href="/" aria-label="Back to home" className="press">
+              <AscendLogo height={28} />
+            </Link>
+            <ConfidentialTag />
+          </div>
           <div ref={cardRef} className="relative shrink-0">
             <button
               type="button"

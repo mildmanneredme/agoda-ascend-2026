@@ -1,5 +1,6 @@
 import { Type } from "@google/genai";
 import { gemini, MODEL, FAST } from "@/lib/gemini";
+import { rateLimit } from "@/lib/rateLimit";
 import { HOTEL } from "@/lib/hotel";
 
 export const maxDuration = 30;
@@ -52,6 +53,9 @@ const schema = {
 };
 
 export async function POST(req: Request) {
+  const limited = rateLimit(req);
+  if (limited) return limited;
+
   const { review } = await req.json();
 
   const prompt = `You are the Sentiment-to-Action engine of ${HOTEL.name}. A guest review has just landed. Decompose it completely — sentiment, the themes raised, and a dispatch list of concrete tasks each routed to the right department with a priority and response SLA. Then draft a warm, specific reply to the guest. Be precise: tasks must reference what the review actually said, not generic service language. Urgent issues (safety, cleanliness, anything broken) get the tightest SLA.

@@ -175,9 +175,9 @@ export default function Journey() {
 
   return (
     <main className="relative min-h-dvh overflow-hidden">
-      <AppHeader title="Journey Assistant" pillar="already-handled" />
+      <AppHeader title="Journey Assistant" pillar="already-handled" perspective="guest" />
 
-      <div className="relative z-10 px-5 pb-24">
+      <div className="frame relative z-10 px-5 pb-24">
         <p className="rise mb-1 text-xs font-semibold uppercase tracking-[0.24em] text-ray-amber">
           Proactive · before you ask
         </p>

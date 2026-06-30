@@ -6,7 +6,8 @@ import AppHeader from "@/components/AppHeader";
 import { AgodaDots } from "@/components/Wordmark";
 import { PARTNERS } from "@/lib/hotel";
 import { loadGuest, styleOf, type GuestProfile } from "@/lib/guest";
-import { personaOf } from "@/lib/personas";
+import { personaOf, stayOf, signalsOf } from "@/lib/personas";
+import PersonaAvatar from "@/components/PersonaAvatar";
 import { useDevTrace } from "@/components/DevTrace";
 import { AGENTS, type AgentId, type TraceStep } from "@/lib/trace";
 
@@ -334,9 +335,15 @@ export default function Concierge() {
 
   if (!guest) return null;
 
+  // Context surfaced in the landscape-iPad sidebar (reuses existing seed data).
+  const style = styleOf(guest);
+  const persona = personaOf(guest);
+  const stay = stayOf(guest);
+  const signals = signalsOf(guest);
+
   return (
     <main className="flex h-dvh flex-col">
-      <AppHeader title="AI Concierge" pillar="already-handled" />
+      <AppHeader title="AI Concierge" pillar="already-handled" perspective="guest" />
 
       {toast && (
         <button
@@ -350,8 +357,13 @@ export default function Concierge() {
         </button>
       )}
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 pt-2">
-        <div className="mx-auto flex max-w-lg flex-col gap-3 pb-4">
+      {/* Below the header: a single column on phones/portrait; chat + a persistent
+          context pane on landscape iPad. The wrappers are `display:contents` on
+          phones so the mobile layout is byte-for-byte unchanged. */}
+      <div className="contents panes:flex panes:min-h-0 panes:flex-1 panes:gap-5 panes:px-4">
+        <div className="contents panes:flex panes:min-h-0 panes:flex-1 panes:flex-col">
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 pt-2">
+        <div className="mx-auto flex max-w-lg flex-col gap-3 pb-4 panes:max-w-none">
           {messages.map((msg, i) => {
             const isStreaming = i === streamingIdx && !!msg.text;
             const isComposingHere = isComposing && i === messages.length - 1 && !msg.text;
@@ -417,8 +429,8 @@ export default function Concierge() {
       </div>
 
       <div className="pb-safe px-4 pt-2">
-        <div className="mx-auto max-w-lg">
-          <div className="mb-2.5 flex gap-2 overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch]">
+        <div className="mx-auto max-w-lg panes:max-w-none">
+          <div className="mb-2.5 flex gap-2 overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch] panes:hidden">
             {CHIPS.map((chip) => (
               <button
                 key={chip}
@@ -458,6 +470,65 @@ export default function Concierge() {
             <AgodaDots size={3} /> any language · any hour
           </p>
         </div>
+      </div>
+        </div>
+
+        {/* Context pane — landscape iPad only; keeps who the concierge is helping in view. */}
+        <aside className="hidden panes:flex panes:w-80 panes:shrink-0 panes:flex-col panes:gap-3 panes:overflow-y-auto panes:py-2 panes:pr-1 panes:pb-safe">
+          <p className="text-[0.6rem] font-bold uppercase tracking-[0.18em] text-ink-faint">
+            Who I&apos;m helping
+          </p>
+
+          <div
+            className="glass-deep flex items-center gap-3 rounded-2xl p-3"
+            style={{ boxShadow: `inset 2px 0 0 ${style.color}` }}
+          >
+            <PersonaAvatar id={guest.personaId ?? ""} glyph={style.emoji} color={style.color} size="h-11 w-11" />
+            <div className="min-w-0">
+              <p className="display text-base font-semibold text-ink">{guest.name}</p>
+              <p className="truncate text-[0.72rem] text-ink-dim">{persona?.role ?? style.label}</p>
+            </div>
+          </div>
+
+          <div className="glass rounded-2xl p-3">
+            <p className="mb-1.5 text-[0.6rem] font-bold uppercase tracking-[0.16em] text-ray-amber">This stay</p>
+            <p className="text-[0.85rem] font-semibold text-ink">{stay.city} · {stay.nights} nights</p>
+            <p className="text-[0.75rem] text-ink-dim">
+              {stay.checkIn} → {stay.checkOut} · {stay.guests} {stay.guests === 1 ? "guest" : "guests"}
+            </p>
+            <p className="mt-1 text-[0.75rem] text-ink-dim">{stay.occasion}</p>
+          </div>
+
+          {signals.length > 0 && (
+            <div className="glass rounded-2xl p-3">
+              <p className="mb-1.5 text-[0.6rem] font-bold uppercase tracking-[0.16em] text-ray-aqua">On file</p>
+              <ul className="flex flex-col gap-1.5">
+                {signals.slice(0, 3).map((s, i) => (
+                  <li key={i} className="flex gap-2 text-[0.75rem] leading-snug text-ink-dim">
+                    <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-ray-aqua" />
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="glass rounded-2xl p-3">
+            <p className="mb-2 text-[0.6rem] font-bold uppercase tracking-[0.16em] text-ink-faint">Try asking</p>
+            <div className="flex flex-col gap-2">
+              {CHIPS.map((chip) => (
+                <button
+                  key={chip}
+                  onClick={() => send(chip)}
+                  disabled={busy}
+                  className="press glass rounded-xl px-3 py-2 text-left text-[0.78rem] font-medium text-ink-dim disabled:opacity-40"
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+          </div>
+        </aside>
       </div>
     </main>
   );

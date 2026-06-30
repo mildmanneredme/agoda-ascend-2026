@@ -26,12 +26,48 @@ export function PillarBadge({ pillar }: { pillar: PillarKey }) {
   );
 }
 
+export type Perspective = "guest" | "hotel";
+
+const PERSPECTIVES = {
+  guest: { label: "Guest view", color: "var(--ray-aqua)" },
+  hotel: { label: "Hotel staff view", color: "var(--ray-amber)" },
+} as const;
+
+/** Who is the intended user of this feature — the guest, or hotel staff. */
+export function PerspectiveBadge({ perspective }: { perspective: Perspective }) {
+  const p = PERSPECTIVES[perspective];
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-hairline px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-ink-dim">
+      <span className="h-1.5 w-1.5 rounded-full" style={{ background: p.color }} />
+      {p.label}
+    </span>
+  );
+}
+
+/** App-wide handling marker. */
+export function ConfidentialTag() {
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-ink-faint"
+      style={{ borderColor: "color-mix(in srgb, var(--ray-amber) 30%, transparent)" }}
+    >
+      <svg width="10" height="10" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
+        <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      </svg>
+      Private &amp; Confidential
+    </span>
+  );
+}
+
 export default function AppHeader({
   title,
   pillar,
+  perspective,
 }: {
   title: string;
   pillar: PillarKey;
+  perspective: Perspective;
 }) {
   const [guest, setGuest] = useState<GuestProfile | null>(null);
   useEffect(() => {
@@ -41,7 +77,7 @@ export default function AppHeader({
 
   return (
     <header className="pt-safe sticky top-0 z-40 px-5 pb-3 backdrop-blur-xl">
-      <div className="flex items-center justify-between gap-2">
+      <div className="frame flex items-center justify-between gap-2">
         <Link
           href="/hub"
           className="press glass flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink-dim"
@@ -72,6 +108,10 @@ export default function AppHeader({
             </span>
           </Link>
         )}
+      </div>
+      <div className="frame mt-2 flex items-center justify-between gap-2">
+        <PerspectiveBadge perspective={perspective} />
+        <ConfidentialTag />
       </div>
     </header>
   );

@@ -125,7 +125,7 @@ function OnboardingInner() {
         </Link>
       </div>
 
-      <div key={stage} className="phase-in pb-safe relative z-10 flex flex-1 flex-col justify-end px-6">
+      <div key={stage} className="frame phase-in pb-safe relative z-10 flex flex-1 flex-col justify-end px-6">
         {stage === "welcome" && (
           <div className="stagger mb-6">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-ray-aqua">
@@ -160,7 +160,7 @@ function OnboardingInner() {
             <p className="rise mb-5 text-sm text-ink-dim">
               Each traveler arrives with their own history. Pick one to step into their stay.
             </p>
-            <div className="stagger -mx-1 flex flex-col gap-2.5 overflow-y-auto px-1 pb-2">
+            <div className="stagger -mx-1 flex flex-col gap-2.5 overflow-y-auto px-1 pb-2 tablet:grid tablet:grid-cols-2">
               {PERSONAS.map((p) => {
                 const c = styleForPersona(p).color;
                 return (
@@ -312,12 +312,24 @@ function OnboardingInner() {
             <h2 id="disclaimer-title" className="display mb-4 text-2xl font-bold leading-tight">
               Before you step in
             </h2>
-            <p className="mb-6 text-sm leading-relaxed text-ink-dim">
+            <p className="mb-4 text-sm leading-relaxed text-ink-dim">
               This is a demonstration sandbox. It is <span className="font-semibold text-ink">not a real
               application</span> and <span className="font-semibold text-ink">The Grand Neural is not a real
               hotel</span>. No information shown is real customer data — every guest, booking and AI response
               is fictional and for demonstration purposes only. Agoda accepts no liability for any information
               presented within this experience.
+            </p>
+            <p className="mb-6 text-xs leading-relaxed text-ink-faint">
+              By proceeding you agree to our{" "}
+              <a
+                href="https://www.agoda.com/info/termsofuse.html?ds=MS2LSmQq%2B14uv29B"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-ink underline underline-offset-2"
+              >
+                Terms of Use
+              </a>
+              .
             </p>
             <button
               onClick={() => {

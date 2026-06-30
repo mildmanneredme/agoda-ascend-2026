@@ -48,6 +48,16 @@
   --font-sans: var(--font-albert);
 }
 
+/* ---------- responsive variants (iPad) ---------- */
+/* Tier 1: any iPad-class width, both orientations */
+@custom-variant tablet (@media (min-width: 768px));
+/* Tier 2: two-pane only when there is genuine horizontal room (landscape iPad) */
+@custom-variant panes {
+  @media (min-width: 1024px) and (orientation: landscape) {
+    @slot;
+  }
+}
+
 html {
   background: var(--abyss);
   color-scheme: dark;
@@ -79,6 +89,19 @@ body::after {
 h1, h2, h3, .display {
   font-family: var(--font-outfit), system-ui, sans-serif;
   letter-spacing: -0.01em;
+}
+
+/* ---------- layout ---------- */
+
+/* centered content column on tablet+ (both orientations); no effect on phones */
+.frame {
+  width: 100%;
+  margin-inline: auto;
+}
+@media (min-width: 768px) {
+  .frame {
+    max-width: 40rem;
+  }
 }
 
 /* ---------- surfaces ---------- */

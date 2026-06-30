@@ -1,5 +1,6 @@
 import { Type } from "@google/genai";
 import { gemini, MODEL, FAST } from "@/lib/gemini";
+import { rateLimit } from "@/lib/rateLimit";
 import { HOTEL, hotelBrief } from "@/lib/hotel";
 
 export const maxDuration = 30;
@@ -29,6 +30,9 @@ const schema = {
 };
 
 export async function POST(req: Request) {
+  const limited = rateLimit(req);
+  if (limited) return limited;
+
   const { guestName, travelStyle, brief, signals } = await req.json();
 
   const context = brief
